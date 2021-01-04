@@ -30,7 +30,7 @@ The -P parameter must be the USB port where your ISP programmer is connected to:
 
 # Example 1 - Interfacing the MCU with the HITACHI HD44780 LCD Controller (8-bit Data Registers)
 
-The HITACHI HD44780 is a dot matrix liquid crystal display controller popular in the 1980s. Common display sizes are (columns x lines): 8x1, 16x2, 20x2 and 20x4, able to display up to 80 different characters (ASCII and Japanese Kana). The LCD offers 16 contacts, designed to easily connected with Intel MCS-51 based MCUs XRAM interface.  
+The HITACHI HD44780 is a dot matrix liquid crystal display controller popular in the 1980s. Common display sizes are (columns x lines): 8x1, 16x2, 20x2 and 20x4, able to display up to 80 different characters (ASCII and Japanese Kana). The LCD offers 16 contacts, designed to easily connect with the Intel MCS-51 based MCU's XRAM interface.  
 
 Source: https://en.wikipedia.org/wiki/Hitachi_HD44780_LCD_controller  
 
