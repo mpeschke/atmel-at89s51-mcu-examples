@@ -28,9 +28,15 @@ The -P parameter must be the USB port where your ISP programmer is connected to:
 
 >*\# avrdude -C ../conf/AT89S5x.conf -c stk500v1 -P /dev/ttyUSB0 -p 89s51 -b 19200 -U flash:w:ex1-lcd-8bits.hex*  
 
-# Example 1 - Interfacing the MCU with the HITACHI HD44780 LCD Module (8-bit Data Registers)
+# Example 1 - Interfacing the MCU with the HITACHI HD44780 LCD Controller (8-bit Data Registers)
 
-Build process:  
+The HITACHI HD44780 is a dot matrix liquid crystal display controller popular in the 1980s. Common display sizes are (columns x lines): 8x1, 16x2, 20x2 and 20x4, able to display up to 80 different characters (ASCII and Japanese Kana). The LCD offers 16 contacts, designed to easily connected with Intel MCS-51 based MCUs XRAM interface.  
+
+Source: https://en.wikipedia.org/wiki/Hitachi_HD44780_LCD_controller  
+
+The pinout to work with this example, using 8 contacts, can be found here: https://upverter.com/design/mpeschke/6fdc961f2fc68cf1/  
+
+To build this example:  
 
 >*$ cd src/*  
 
