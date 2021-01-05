@@ -84,6 +84,12 @@ void LCD_IRWrite(unsigned char ir)
     pulse_enable();
 }
 
+void LCD_IRWrite_4bits(unsigned char ir)
+{
+    LCD_IRWrite(ir);
+    LCD_IRWrite(ir << 4);
+}
+
 void LCD_DRWrite(unsigned char dr)
 {
     wait_until_not_busy();
@@ -98,4 +104,14 @@ void LCD_StringWrite(unsigned char* pstr)
     unsigned char i;
     for(i=0; pstr[i] != 0; i++)
         LCD_DRWrite(pstr[i]);
+}
+
+void LCD_StringWrite_4bits(unsigned char* pstr)
+{
+    unsigned char i;
+    for(i=0; pstr[i] != 0; i++)
+    {
+        LCD_DRWrite(pstr[i]);
+        LCD_DRWrite(pstr[i] << 4);
+    }
 }

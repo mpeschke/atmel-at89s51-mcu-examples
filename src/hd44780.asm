@@ -1,6 +1,6 @@
 ;--------------------------------------------------------
 ; File Created by SDCC : free open source ANSI-C Compiler
-; Version 3.8.0 #10562 (Linux)
+; Version 4.0.0 #11528 (Mac OS X x86_64)
 ;--------------------------------------------------------
 	.module hd44780
 	.optsdcc -mmcs51 --model-small
@@ -8,6 +8,7 @@
 ;--------------------------------------------------------
 ; Public variables in this module
 ;--------------------------------------------------------
+	.globl _LCD_DRWrite
 	.globl _wait_until_not_busy
 	.globl _data_register_write_internal_operation
 	.globl _instruction_register_write_internal_operation
@@ -118,8 +119,9 @@
 	.globl __BUSY_FLAG
 	.globl _LCD_set_busyflag_check_delay
 	.globl _LCD_IRWrite
-	.globl _LCD_DRWrite
+	.globl _LCD_IRWrite_4bits
 	.globl _LCD_StringWrite
+	.globl _LCD_StringWrite_4bits
 ;--------------------------------------------------------
 ; special function registers
 ;--------------------------------------------------------
@@ -513,26 +515,48 @@ _LCD_IRWrite:
 ;	../lib/hd44780.c:85: }
 	ljmp	_pulse_enable
 ;------------------------------------------------------------
+;Allocation info for local variables in function 'LCD_IRWrite_4bits'
+;------------------------------------------------------------
+;ir                        Allocated to registers r7 
+;------------------------------------------------------------
+;	../lib/hd44780.c:87: void LCD_IRWrite_4bits(unsigned char ir)
+;	-----------------------------------------
+;	 function LCD_IRWrite_4bits
+;	-----------------------------------------
+_LCD_IRWrite_4bits:
+;	../lib/hd44780.c:89: LCD_IRWrite(ir);
+	mov  r7,dpl
+	push	ar7
+	lcall	_LCD_IRWrite
+	pop	ar7
+;	../lib/hd44780.c:90: LCD_IRWrite(ir << 4);
+	mov	a,r7
+	swap	a
+	anl	a,#0xf0
+	mov	dpl,a
+;	../lib/hd44780.c:91: }
+	ljmp	_LCD_IRWrite
+;------------------------------------------------------------
 ;Allocation info for local variables in function 'LCD_DRWrite'
 ;------------------------------------------------------------
 ;dr                        Allocated to registers r7 
 ;------------------------------------------------------------
-;	../lib/hd44780.c:87: void LCD_DRWrite(unsigned char dr)
+;	../lib/hd44780.c:93: void LCD_DRWrite(unsigned char dr)
 ;	-----------------------------------------
 ;	 function LCD_DRWrite
 ;	-----------------------------------------
 _LCD_DRWrite:
 	mov	r7,dpl
-;	../lib/hd44780.c:89: wait_until_not_busy();
+;	../lib/hd44780.c:95: wait_until_not_busy();
 	push	ar7
 	lcall	_wait_until_not_busy
 	pop	ar7
-;	../lib/hd44780.c:91: _LCD_IR_DR_BUS=dr;
+;	../lib/hd44780.c:97: _LCD_IR_DR_BUS=dr;
 	mov	__LCD_IR_DR_BUS,r7
-;	../lib/hd44780.c:92: data_register_write_internal_operation();
+;	../lib/hd44780.c:98: data_register_write_internal_operation();
 	lcall	_data_register_write_internal_operation
-;	../lib/hd44780.c:93: pulse_enable();
-;	../lib/hd44780.c:94: }
+;	../lib/hd44780.c:99: pulse_enable();
+;	../lib/hd44780.c:100: }
 	ljmp	_pulse_enable
 ;------------------------------------------------------------
 ;Allocation info for local variables in function 'LCD_StringWrite'
@@ -540,7 +564,7 @@ _LCD_DRWrite:
 ;pstr                      Allocated to registers r5 r6 r7 
 ;i                         Allocated to registers r4 
 ;------------------------------------------------------------
-;	../lib/hd44780.c:96: void LCD_StringWrite(unsigned char* pstr)
+;	../lib/hd44780.c:102: void LCD_StringWrite(unsigned char* pstr)
 ;	-----------------------------------------
 ;	 function LCD_StringWrite
 ;	-----------------------------------------
@@ -548,7 +572,7 @@ _LCD_StringWrite:
 	mov	r5,dpl
 	mov	r6,dph
 	mov	r7,b
-;	../lib/hd44780.c:99: for(i=0; pstr[i] != 0; i++)
+;	../lib/hd44780.c:105: for(i=0; pstr[i] != 0; i++)
 	mov	r4,#0x00
 00103$:
 	mov	a,r4
@@ -564,7 +588,7 @@ _LCD_StringWrite:
 	lcall	__gptrget
 	mov	r3,a
 	jz	00105$
-;	../lib/hd44780.c:100: LCD_DRWrite(pstr[i]);
+;	../lib/hd44780.c:106: LCD_DRWrite(pstr[i]);
 	mov	dpl,r3
 	push	ar7
 	push	ar6
@@ -575,11 +599,73 @@ _LCD_StringWrite:
 	pop	ar5
 	pop	ar6
 	pop	ar7
-;	../lib/hd44780.c:99: for(i=0; pstr[i] != 0; i++)
+;	../lib/hd44780.c:105: for(i=0; pstr[i] != 0; i++)
 	inc	r4
 	sjmp	00103$
 00105$:
-;	../lib/hd44780.c:101: }
+;	../lib/hd44780.c:107: }
+	ret
+;------------------------------------------------------------
+;Allocation info for local variables in function 'LCD_StringWrite_4bits'
+;------------------------------------------------------------
+;pstr                      Allocated to registers r5 r6 r7 
+;i                         Allocated to registers r4 
+;------------------------------------------------------------
+;	../lib/hd44780.c:109: void LCD_StringWrite_4bits(unsigned char* pstr)
+;	-----------------------------------------
+;	 function LCD_StringWrite_4bits
+;	-----------------------------------------
+_LCD_StringWrite_4bits:
+	mov	r5,dpl
+	mov	r6,dph
+	mov	r7,b
+;	../lib/hd44780.c:112: for(i=0; pstr[i] != 0; i++)
+	mov	r4,#0x00
+00103$:
+	mov	a,r4
+	add	a,r5
+	mov	r1,a
+	clr	a
+	addc	a,r6
+	mov	r2,a
+	mov	ar3,r7
+	mov	dpl,r1
+	mov	dph,r2
+	mov	b,r3
+	lcall	__gptrget
+	mov	r0,a
+	jz	00105$
+;	../lib/hd44780.c:114: LCD_DRWrite(pstr[i]);
+	mov	dpl,r0
+	push	ar7
+	push	ar6
+	push	ar5
+	push	ar4
+	push	ar3
+	push	ar2
+	push	ar1
+	lcall	_LCD_DRWrite
+	pop	ar1
+	pop	ar2
+	pop	ar3
+;	../lib/hd44780.c:115: LCD_DRWrite(pstr[i] << 4);
+	mov	dpl,r1
+	mov	dph,r2
+	mov	b,r3
+	lcall	__gptrget
+	swap	a
+	anl	a,#0xf0
+	mov	dpl,a
+	lcall	_LCD_DRWrite
+	pop	ar4
+	pop	ar5
+	pop	ar6
+	pop	ar7
+;	../lib/hd44780.c:112: for(i=0; pstr[i] != 0; i++)
+	inc	r4
+	sjmp	00103$
+00105$:
+;	../lib/hd44780.c:117: }
 	ret
 	.area CSEG    (CODE)
 	.area CONST   (CODE)
@@ -589,6 +675,8 @@ _IR_DISPLAY_ON_CURSOR_ON:
 	.db #0x0e	; 14
 _IR_FIVE_EIGHT_TWO_DISPLAY_LINES:
 	.db #0x38	; 56	'8'
+_IR_FIVE_FOUR_TWO_DISPLAY_LINES:
+	.db #0x28	; 40
 _IR_DISPLAY_CURSOR_HOME_FIRSTLINE:
 	.db #0x80	; 128
 _IR_DISPLAY_CURSOR_HOME_SECONLINE:

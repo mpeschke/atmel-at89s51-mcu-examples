@@ -18,7 +18,7 @@ It is possible to create a CMake-based set of files to automate the build proces
 
 ## Flashing the Firmware
 
-There are many ways to program (flash) the AT89S51's firwmware. The most common is to wire an Arduino to the MCU as an ISP programmer (the *Serial Programming* as referred to in the AT89S51 documentation). Once properly wired, you can use avrdude to upload the HEX file, throught the Arduino, into the AT89S51 flash memory. Example:  
+There are many ways to program (flash) the AT89S51's firwmware. The most common is to wire an Arduino to the MCU as an ISP programmer (the *Serial Programming* as referred to in the AT89S51 documentation). Once properly wired, you can use avrdude to upload the HEX file, through the Arduino, into the AT89S51 flash memory. Example:  
 
 >*$ cd src/*  
 
