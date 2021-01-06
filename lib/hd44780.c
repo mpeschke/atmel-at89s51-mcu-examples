@@ -12,8 +12,7 @@ static int DELAY = 500;
 static const unsigned char HIGH = 0xff;
 static const unsigned char LOW  = 0x00;
 
-// Set the 'delay' until the next BUSY_FLAG LCD check.
-void LCD_set_busyflag_check_delay(int delay)
+void lcd_set_pulse_and_busyflag_delay(int delay)
 { DELAY = delay; }
 
 // Adds a 'delay' while waiting for a LCD controller response.
@@ -28,7 +27,9 @@ void delay()
 void pulse_enable()
 {
     _LCD_EN=HIGH;
+    delay();
     _LCD_EN=LOW;
+    delay();
 }
 
 // Start BUSY_FLAG read operation or add counter operation.
@@ -75,43 +76,55 @@ void wait_until_not_busy()
     _LCD_EN=LOW;
 }
 
-void LCD_IRWrite(unsigned char ir)
+void lcd_irwrite(unsigned char ir)
 {
     wait_until_not_busy();
     // Place the Instruction Register on the MCU-LCD BUS.
-    _LCD_IR_DR_BUS=ir;
     instruction_register_write_internal_operation();
+    _LCD_IR_DR_BUS=ir;
     pulse_enable();
 }
 
-void LCD_IRWrite_4bits(unsigned char ir)
-{
-    LCD_IRWrite(ir);
-    LCD_IRWrite(ir << 4);
-}
+//******************************************************************************
+// 8-BIT BUS FUNCTIONS
 
 void LCD_DRWrite(unsigned char dr)
 {
     wait_until_not_busy();
     // Place the Data Register on the MCU-LCD BUS.
-    _LCD_IR_DR_BUS=dr;
     data_register_write_internal_operation();
+    _LCD_IR_DR_BUS=dr;
     pulse_enable();
 }
 
-void LCD_StringWrite(unsigned char* pstr)
+void lcd_stringwrite(unsigned char* pstr)
 {
     unsigned char i;
     for(i=0; pstr[i] != 0; i++)
         LCD_DRWrite(pstr[i]);
 }
 
-void LCD_StringWrite_4bits(unsigned char* pstr)
+// 8-BIT BUS FUNCTIONS
+//******************************************************************************
+
+//******************************************************************************
+// 4-BIT BUS FUNCTIONS
+
+void lcd_irwrite_4bits(unsigned char ir)
+{
+    lcd_irwrite(ir); // Send first the upper 4 bits.
+    lcd_irwrite(ir << 4); // and then the lower 4 bits.
+}
+
+void lcd_stringwrite_4bits(unsigned char* pstr)
 {
     unsigned char i;
     for(i=0; pstr[i] != 0; i++)
     {
-        LCD_DRWrite(pstr[i]);
-        LCD_DRWrite(pstr[i] << 4);
+        LCD_DRWrite(pstr[i]); // Send first the upper 4 bits.
+        LCD_DRWrite(pstr[i] << 4); // and then the lower 4 bits.
     }
 }
+
+// 4-BIT BUS FUNCTIONS
+//******************************************************************************

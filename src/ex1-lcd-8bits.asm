@@ -9,9 +9,10 @@
 ; Public variables in this module
 ;--------------------------------------------------------
 	.globl _main
-	.globl _LCD_StringWrite
-	.globl _LCD_IRWrite
-	.globl _LCD_set_busyflag_check_delay
+	.globl _mcs51_mult_max_timer0_delay
+	.globl _lcd_stringwrite
+	.globl _lcd_irwrite
+	.globl _lcd_set_pulse_and_busyflag_delay
 ;--------------------------------------------------------
 ; special function registers
 ;--------------------------------------------------------
@@ -31,9 +32,17 @@
 ; internal ram data
 ;--------------------------------------------------------
 	.area DSEG    (DATA)
-_main_line1_65536_5:
+_TWO_SECONDS:
+	.ds 2
+_FIVE_SECONDS:
+	.ds 2
+_DATA_BUS_PULSE_INTERVAL:
+	.ds 2
+_main_line1_65536_7:
 	.ds 17
-_main_line2_65536_5:
+_main_line2_65536_7:
+	.ds 17
+_main_refresh_65536_7:
 	.ds 17
 ;--------------------------------------------------------
 ; overlayable items in internal ram 
@@ -103,6 +112,15 @@ __interrupt_vect:
 	.globl __mcs51_genXINIT
 	.globl __mcs51_genXRAMCLEAR
 	.globl __mcs51_genRAMCLEAR
+;	ex1-lcd-8bits.c:20: static int TWO_SECONDS = 26;
+	mov	_TWO_SECONDS,#0x1a
+	mov	(_TWO_SECONDS + 1),#0x00
+;	ex1-lcd-8bits.c:21: static int FIVE_SECONDS = 64;
+	mov	_FIVE_SECONDS,#0x40
+	mov	(_FIVE_SECONDS + 1),#0x00
+;	ex1-lcd-8bits.c:22: static int DATA_BUS_PULSE_INTERVAL = 150;
+	mov	_DATA_BUS_PULSE_INTERVAL,#0x96
+	mov	(_DATA_BUS_PULSE_INTERVAL + 1),#0x00
 	.area GSFINAL (CODE)
 	ljmp	__sdcc_program_startup
 ;--------------------------------------------------------
@@ -120,10 +138,11 @@ __sdcc_program_startup:
 ;------------------------------------------------------------
 ;Allocation info for local variables in function 'main'
 ;------------------------------------------------------------
-;line1                     Allocated with name '_main_line1_65536_5'
-;line2                     Allocated with name '_main_line2_65536_5'
+;line1                     Allocated with name '_main_line1_65536_7'
+;line2                     Allocated with name '_main_line2_65536_7'
+;refresh                   Allocated with name '_main_refresh_65536_7'
 ;------------------------------------------------------------
-;	ex1-lcd-8bits.c:3: int main()
+;	ex1-lcd-8bits.c:24: int main()
 ;	-----------------------------------------
 ;	 function main
 ;	-----------------------------------------
@@ -136,97 +155,147 @@ _main:
 	ar2 = 0x02
 	ar1 = 0x01
 	ar0 = 0x00
-;	ex1-lcd-8bits.c:5: unsigned char line1[]={"THIS IS LINE 01!"}, line2[]={"THIS IS LINE 02!"};
-	mov	_main_line1_65536_5,#0x54
-	mov	(_main_line1_65536_5 + 0x0001),#0x48
-	mov	(_main_line1_65536_5 + 0x0002),#0x49
-	mov	(_main_line1_65536_5 + 0x0003),#0x53
-	mov	(_main_line1_65536_5 + 0x0004),#0x20
-	mov	(_main_line1_65536_5 + 0x0005),#0x49
-	mov	(_main_line1_65536_5 + 0x0006),#0x53
-	mov	(_main_line1_65536_5 + 0x0007),#0x20
-	mov	(_main_line1_65536_5 + 0x0008),#0x4c
-	mov	(_main_line1_65536_5 + 0x0009),#0x49
-	mov	(_main_line1_65536_5 + 0x000a),#0x4e
-	mov	(_main_line1_65536_5 + 0x000b),#0x45
-	mov	(_main_line1_65536_5 + 0x000c),#0x20
-	mov	(_main_line1_65536_5 + 0x000d),#0x30
-	mov	(_main_line1_65536_5 + 0x000e),#0x31
-	mov	(_main_line1_65536_5 + 0x000f),#0x21
-	mov	(_main_line1_65536_5 + 0x0010),#0x00
-	mov	_main_line2_65536_5,#0x54
-	mov	(_main_line2_65536_5 + 0x0001),#0x48
-	mov	(_main_line2_65536_5 + 0x0002),#0x49
-	mov	(_main_line2_65536_5 + 0x0003),#0x53
-	mov	(_main_line2_65536_5 + 0x0004),#0x20
-	mov	(_main_line2_65536_5 + 0x0005),#0x49
-	mov	(_main_line2_65536_5 + 0x0006),#0x53
-	mov	(_main_line2_65536_5 + 0x0007),#0x20
-	mov	(_main_line2_65536_5 + 0x0008),#0x4c
-	mov	(_main_line2_65536_5 + 0x0009),#0x49
-	mov	(_main_line2_65536_5 + 0x000a),#0x4e
-	mov	(_main_line2_65536_5 + 0x000b),#0x45
-	mov	(_main_line2_65536_5 + 0x000c),#0x20
-	mov	(_main_line2_65536_5 + 0x000d),#0x30
-	mov	(_main_line2_65536_5 + 0x000e),#0x32
-	mov	(_main_line2_65536_5 + 0x000f),#0x21
-	mov	(_main_line2_65536_5 + 0x0010),#0x00
-;	ex1-lcd-8bits.c:7: LCD_set_busyflag_check_delay(1);
-	mov	dptr,#0x0001
-	lcall	_LCD_set_busyflag_check_delay
-;	ex1-lcd-8bits.c:8: LCD_IRWrite(IR_FIVE_EIGHT_TWO_DISPLAY_LINES);
-	mov	dptr,#_IR_FIVE_EIGHT_TWO_DISPLAY_LINES
+;	ex1-lcd-8bits.c:26: unsigned char line1[]={"THIS IS LINE 01!"}, line2[]={"THIS IS LINE 02!"}, refresh[]={"REFRESH IN 5 SEC"};
+	mov	_main_line1_65536_7,#0x54
+	mov	(_main_line1_65536_7 + 0x0001),#0x48
+	mov	(_main_line1_65536_7 + 0x0002),#0x49
+	mov	(_main_line1_65536_7 + 0x0003),#0x53
+	mov	(_main_line1_65536_7 + 0x0004),#0x20
+	mov	(_main_line1_65536_7 + 0x0005),#0x49
+	mov	(_main_line1_65536_7 + 0x0006),#0x53
+	mov	(_main_line1_65536_7 + 0x0007),#0x20
+	mov	(_main_line1_65536_7 + 0x0008),#0x4c
+	mov	(_main_line1_65536_7 + 0x0009),#0x49
+	mov	(_main_line1_65536_7 + 0x000a),#0x4e
+	mov	(_main_line1_65536_7 + 0x000b),#0x45
+	mov	(_main_line1_65536_7 + 0x000c),#0x20
+	mov	(_main_line1_65536_7 + 0x000d),#0x30
+	mov	(_main_line1_65536_7 + 0x000e),#0x31
+	mov	(_main_line1_65536_7 + 0x000f),#0x21
+	mov	(_main_line1_65536_7 + 0x0010),#0x00
+	mov	_main_line2_65536_7,#0x54
+	mov	(_main_line2_65536_7 + 0x0001),#0x48
+	mov	(_main_line2_65536_7 + 0x0002),#0x49
+	mov	(_main_line2_65536_7 + 0x0003),#0x53
+	mov	(_main_line2_65536_7 + 0x0004),#0x20
+	mov	(_main_line2_65536_7 + 0x0005),#0x49
+	mov	(_main_line2_65536_7 + 0x0006),#0x53
+	mov	(_main_line2_65536_7 + 0x0007),#0x20
+	mov	(_main_line2_65536_7 + 0x0008),#0x4c
+	mov	(_main_line2_65536_7 + 0x0009),#0x49
+	mov	(_main_line2_65536_7 + 0x000a),#0x4e
+	mov	(_main_line2_65536_7 + 0x000b),#0x45
+	mov	(_main_line2_65536_7 + 0x000c),#0x20
+	mov	(_main_line2_65536_7 + 0x000d),#0x30
+	mov	(_main_line2_65536_7 + 0x000e),#0x32
+	mov	(_main_line2_65536_7 + 0x000f),#0x21
+	mov	(_main_line2_65536_7 + 0x0010),#0x00
+	mov	_main_refresh_65536_7,#0x52
+	mov	(_main_refresh_65536_7 + 0x0001),#0x45
+	mov	(_main_refresh_65536_7 + 0x0002),#0x46
+	mov	(_main_refresh_65536_7 + 0x0003),#0x52
+	mov	(_main_refresh_65536_7 + 0x0004),#0x45
+	mov	(_main_refresh_65536_7 + 0x0005),#0x53
+	mov	(_main_refresh_65536_7 + 0x0006),#0x48
+	mov	(_main_refresh_65536_7 + 0x0007),#0x20
+	mov	(_main_refresh_65536_7 + 0x0008),#0x49
+	mov	(_main_refresh_65536_7 + 0x0009),#0x4e
+	mov	(_main_refresh_65536_7 + 0x000a),#0x20
+	mov	(_main_refresh_65536_7 + 0x000b),#0x35
+	mov	(_main_refresh_65536_7 + 0x000c),#0x20
+	mov	(_main_refresh_65536_7 + 0x000d),#0x53
+	mov	(_main_refresh_65536_7 + 0x000e),#0x45
+	mov	(_main_refresh_65536_7 + 0x000f),#0x43
+	mov	(_main_refresh_65536_7 + 0x0010),#0x00
+;	ex1-lcd-8bits.c:29: mcs51_mult_max_timer0_delay(TWO_SECONDS);
+	mov	dpl,_TWO_SECONDS
+	mov	dph,(_TWO_SECONDS + 1)
+	lcall	_mcs51_mult_max_timer0_delay
+;	ex1-lcd-8bits.c:33: lcd_set_pulse_and_busyflag_delay(DATA_BUS_PULSE_INTERVAL);
+	mov	dpl,_DATA_BUS_PULSE_INTERVAL
+	mov	dph,(_DATA_BUS_PULSE_INTERVAL + 1)
+	lcall	_lcd_set_pulse_and_busyflag_delay
+;	ex1-lcd-8bits.c:34: lcd_irwrite(HD44780_IR_FIVE_EIGHT_TWO_DISPLAY_LINES);
+	mov	dptr,#_HD44780_IR_FIVE_EIGHT_TWO_DISPLAY_LINES
 	clr	a
 	movc	a,@a+dptr
 	mov	dpl,a
-	lcall	_LCD_IRWrite
-;	ex1-lcd-8bits.c:9: LCD_IRWrite(IR_DISPLAY_ON_CURSOR_ON);
-	mov	dptr,#_IR_DISPLAY_ON_CURSOR_ON
+	lcall	_lcd_irwrite
+;	ex1-lcd-8bits.c:35: lcd_irwrite(HD44780_IR_DISPLAY_ON_CURSOR_ON);
+	mov	dptr,#_HD44780_IR_DISPLAY_ON_CURSOR_ON
 	clr	a
 	movc	a,@a+dptr
 	mov	dpl,a
-	lcall	_LCD_IRWrite
-;	ex1-lcd-8bits.c:11: while(1){
+	lcall	_lcd_irwrite
+;	ex1-lcd-8bits.c:37: while(1){
 00102$:
-;	ex1-lcd-8bits.c:12: LCD_IRWrite(IR_DISPLAY_CLEAR);
-	mov	dptr,#_IR_DISPLAY_CLEAR
+;	ex1-lcd-8bits.c:38: lcd_irwrite(HD44780_IR_DISPLAY_CLEAR);
+	mov	dptr,#_HD44780_IR_DISPLAY_CLEAR
 	clr	a
 	movc	a,@a+dptr
 	mov	dpl,a
-	lcall	_LCD_IRWrite
-;	ex1-lcd-8bits.c:13: LCD_IRWrite(IR_DISPLAY_CURSOR_HOME_FIRSTLINE);
-	mov	dptr,#_IR_DISPLAY_CURSOR_HOME_FIRSTLINE
+	lcall	_lcd_irwrite
+;	ex1-lcd-8bits.c:39: lcd_irwrite(HD44780_IR_DISPLAY_CURSOR_HOME_FIRSTLINE);
+	mov	dptr,#_HD44780_IR_DISPLAY_CURSOR_HOME_FIRSTLINE
 	clr	a
 	movc	a,@a+dptr
 	mov	dpl,a
-	lcall	_LCD_IRWrite
-;	ex1-lcd-8bits.c:14: LCD_StringWrite(line1);
-	mov	dptr,#_main_line1_65536_5
+	lcall	_lcd_irwrite
+;	ex1-lcd-8bits.c:40: lcd_stringwrite(refresh);
+	mov	dptr,#_main_refresh_65536_7
 	mov	b,#0x40
-	lcall	_LCD_StringWrite
-;	ex1-lcd-8bits.c:16: LCD_IRWrite(IR_DISPLAY_CURSOR_HOME_SECONLINE);
-	mov	dptr,#_IR_DISPLAY_CURSOR_HOME_SECONLINE
+	lcall	_lcd_stringwrite
+;	ex1-lcd-8bits.c:42: mcs51_mult_max_timer0_delay(FIVE_SECONDS);
+	mov	dpl,_FIVE_SECONDS
+	mov	dph,(_FIVE_SECONDS + 1)
+	lcall	_mcs51_mult_max_timer0_delay
+;	ex1-lcd-8bits.c:43: lcd_irwrite(HD44780_IR_DISPLAY_CLEAR);
+	mov	dptr,#_HD44780_IR_DISPLAY_CLEAR
 	clr	a
 	movc	a,@a+dptr
 	mov	dpl,a
-	lcall	_LCD_IRWrite
-;	ex1-lcd-8bits.c:17: LCD_StringWrite(line2);
-	mov	dptr,#_main_line2_65536_5
+	lcall	_lcd_irwrite
+;	ex1-lcd-8bits.c:44: lcd_irwrite(HD44780_IR_DISPLAY_CURSOR_HOME_FIRSTLINE);
+	mov	dptr,#_HD44780_IR_DISPLAY_CURSOR_HOME_FIRSTLINE
+	clr	a
+	movc	a,@a+dptr
+	mov	dpl,a
+	lcall	_lcd_irwrite
+;	ex1-lcd-8bits.c:46: lcd_stringwrite(line1);
+	mov	dptr,#_main_line1_65536_7
 	mov	b,#0x40
-	lcall	_LCD_StringWrite
-;	ex1-lcd-8bits.c:19: }
+	lcall	_lcd_stringwrite
+;	ex1-lcd-8bits.c:48: lcd_irwrite(HD44780_IR_DISPLAY_CURSOR_HOME_SECONLINE);
+	mov	dptr,#_HD44780_IR_DISPLAY_CURSOR_HOME_SECONLINE
+	clr	a
+	movc	a,@a+dptr
+	mov	dpl,a
+	lcall	_lcd_irwrite
+;	ex1-lcd-8bits.c:49: lcd_stringwrite(line2);
+	mov	dptr,#_main_line2_65536_7
+	mov	b,#0x40
+	lcall	_lcd_stringwrite
+;	ex1-lcd-8bits.c:50: mcs51_mult_max_timer0_delay(TWO_SECONDS);
+	mov	dpl,_TWO_SECONDS
+	mov	dph,(_TWO_SECONDS + 1)
+	lcall	_mcs51_mult_max_timer0_delay
+;	ex1-lcd-8bits.c:52: }
 	sjmp	00102$
 	.area CSEG    (CODE)
 	.area CONST   (CODE)
-_IR_DISPLAY_CLEAR:
+_HD44780_IR_DISPLAY_CLEAR:
 	.db #0x01	; 1
-_IR_DISPLAY_ON_CURSOR_ON:
+_HD44780_IR_ENABLE_4BIT_IRDR:
+	.db #0x02	; 2
+_HD44780_IR_DISPLAY_ON_CURSOR_ON:
 	.db #0x0e	; 14
-_IR_FIVE_EIGHT_TWO_DISPLAY_LINES:
+_HD44780_IR_FIVE_EIGHT_TWO_DISPLAY_LINES:
 	.db #0x38	; 56	'8'
-_IR_DISPLAY_CURSOR_HOME_FIRSTLINE:
+_HD44780_IR_FIVE_FOUR_TWO_DISPLAY_LINES:
+	.db #0x28	; 40
+_HD44780_IR_DISPLAY_CURSOR_HOME_FIRSTLINE:
 	.db #0x80	; 128
-_IR_DISPLAY_CURSOR_HOME_SECONLINE:
+_HD44780_IR_DISPLAY_CURSOR_HOME_SECONLINE:
 	.db #0xc0	; 192
 	.area XINIT   (CODE)
 	.area CABS    (ABS,CODE)

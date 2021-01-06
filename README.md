@@ -28,9 +28,9 @@ The -P parameter must be the USB port where your ISP programmer is connected to:
 
 >*\# avrdude -C ../conf/AT89S5x.conf -c stk500v1 -P /dev/ttyUSB0 -p 89s51 -b 19200 -U flash:w:ex1-lcd-8bits.hex*  
 
-# Example 1 - Interfacing the MCU with the HITACHI HD44780 LCD Controller (8-bit Data Registers)
+# Example 1 - Interfacing the MCU with a HITACHI HD44780 LCD Controller Module (8-bit Data Registers)
 
-The HITACHI HD44780 is a dot matrix liquid crystal display controller popular in the 1980s. Common display sizes are (columns x lines): 8x1, 16x2, 20x2 and 20x4, able to display up to 80 different characters (ASCII and Japanese Kana). The LCD offers 16 contacts, designed to easily connect with the Intel MCS-51 based MCU's XRAM interface.  
+The HITACHI HD44780 is a dot matrix liquid crystal display controller popular in the 1980s. Common display sizes are (columns x lines): 8x1, 16x2, 20x2 and 20x4, able to display up to 80 different characters (ASCII and Japanese Kana). Available modules usually offer 16 contacts, designed to easily connect with the Intel MCS-51 based MCU's XRAM interface.  
 
 Source: https://en.wikipedia.org/wiki/Hitachi_HD44780_LCD_controller  
 
@@ -43,15 +43,44 @@ To build this example:
 Build the libraries' machine code objects:  
 
 >*$ sdcc -c ../lib/hd44780.c*  
+>*$ sdcc -c ../lib/mcs-51.c*  
 
 Create the libraries' lib files:  
 
 >*$ sdar -rc hd44780.lib hd44780.rel*  
+>*$ sdar -rc mcs-51.lib mcs-51.rel*  
 
 Build the example's machine code objects and link to the libraries' binaries:  
 
->*$ sdcc ex1-lcd-8bits.c hd44780.lib -L hd44780*  
+>*$ sdcc ex1-lcd-8bits.c mcs-51.lib hd44780.lib -L mcs-51.lib hd44780.lib*  
 
 Create the Intel HEX file ready to be flashed into the MCU's firmware:  
 
 >*$ packihx ex1-lcd-8bits.ihx > ex1-lcd-8bits.hex*  
+
+# Example 2 - Interfacing the MCU with a HITACHI HD44780 LCD Controller Module (4-bit Data Registers)
+
+The pinout to work with this example, using 4 contacts, can be found here: https://upverter.com/design/mpeschke/f663efbbfb30df67  
+
+To build this example:  
+
+>*$ cd src/*  
+
+Build the libraries' machine code objects:  
+
+>*$ sdcc -c ../lib/hd44780.c*  
+>*$ sdcc -c ../lib/mcs-51.c*  
+
+Create the libraries' lib files:  
+
+>*$ sdar -rc hd44780.lib hd44780.rel*  
+>*$ sdar -rc mcs-51.lib mcs-51.rel*  
+
+Build the example's machine code objects and link to the libraries' binaries:  
+
+>*$ sdcc ex2-lcd-4bits.c mcs-51.lib hd44780.lib -L mcs-51.lib hd44780.lib*  
+
+Create the Intel HEX file ready to be flashed into the MCU's firmware:  
+
+>*$ packihx ex2-lcd-4bits.ihx > ex2-lcd-4bits.hex*  
+
