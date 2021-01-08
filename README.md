@@ -24,9 +24,9 @@ There are many ways to program (flash) the AT89S51's firwmware. The most common 
 
 The -P parameter must be the USB port where your ISP programmer is connected to:  
 
->*\# avrdude -C ../conf/AT89S5x.conf -c stk500v1 -P /dev/ttyUSB0 -p 89s51 -b 19200*  
+>*$ avrdude -C ../conf/AT89S5x.conf -c stk500v1 -P /dev/ttyUSB0 -p 89s51 -b 19200*  
 
->*\# avrdude -C ../conf/AT89S5x.conf -c stk500v1 -P /dev/ttyUSB0 -p 89s51 -b 19200 -U flash:w:ex1-lcd-8bits.hex*  
+>*$ avrdude -C ../conf/AT89S5x.conf -c stk500v1 -P /dev/ttyUSB0 -p 89s51 -b 19200 -U flash:w:ex1-lcd-8bits.hex*  
 
 # Example 1 - Interfacing the MCU with a HITACHI HD44780 LCD Controller Module (8-bit Data Registers)
 
