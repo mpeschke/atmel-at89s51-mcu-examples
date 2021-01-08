@@ -12,8 +12,8 @@ static int DELAY = 500;
 static const unsigned char HIGH = 0xff;
 static const unsigned char LOW  = 0x00;
 
-void lcd_set_pulse_and_busyflag_delay(int delay)
-{ DELAY = delay; }
+void lcd_set_pulse_and_busyflag_delay(const int* pdelay)
+{ DELAY = *pdelay; }
 
 // Adds a 'delay' while waiting for a LCD controller response.
 // See 'LCD_set_busyflag_check_delay' and 'wait_until_not_busy' functions.
@@ -29,7 +29,6 @@ void pulse_enable()
     _LCD_EN=HIGH;
     delay();
     _LCD_EN=LOW;
-    delay();
 }
 
 // Start BUSY_FLAG read operation or add counter operation.
@@ -69,9 +68,9 @@ void wait_until_not_busy()
 
     _LCD_EN=HIGH;
 
-    do {
+    while (_BUSY_FLAG) {
         delay();
-    } while (_BUSY_FLAG);
+    };
     
     _LCD_EN=LOW;
 }
@@ -88,7 +87,7 @@ void lcd_irwrite(unsigned char ir)
 //******************************************************************************
 // 8-BIT BUS FUNCTIONS
 
-void LCD_DRWrite(unsigned char dr)
+void lcd_drwrite(unsigned char dr)
 {
     wait_until_not_busy();
     // Place the Data Register on the MCU-LCD BUS.
@@ -101,7 +100,7 @@ void lcd_stringwrite(unsigned char* pstr)
 {
     unsigned char i;
     for(i=0; pstr[i] != 0; i++)
-        LCD_DRWrite(pstr[i]);
+        lcd_drwrite(pstr[i]);
 }
 
 // 8-BIT BUS FUNCTIONS
@@ -121,8 +120,8 @@ void lcd_stringwrite_4bits(unsigned char* pstr)
     unsigned char i;
     for(i=0; pstr[i] != 0; i++)
     {
-        LCD_DRWrite(pstr[i]); // Send first the upper 4 bits.
-        LCD_DRWrite(pstr[i] << 4); // and then the lower 4 bits.
+        lcd_drwrite(pstr[i]); // Send first the upper 4 bits.
+        lcd_drwrite(pstr[i] << 4); // and then the lower 4 bits.
     }
 }
 
