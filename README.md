@@ -28,6 +28,8 @@ The -P parameter must be the USB port where your ISP programmer is connected to:
 
 >*$ avrdude -C ../conf/AT89S5x.conf -c stk500v1 -P /dev/ttyUSB0 -p 89s51 -b 19200 -U flash:w:ex1-lcd-8bits.hex*  
 
+To setup an Arduino Uno as an AVRISP programmer, check this video: https://studio.youtube.com/video/Pdi-q-bamlI  
+
 # Example 1 - Interfacing the MCU with a HITACHI HD44780 LCD Controller Module (8-bit Data Registers)
 
 The HITACHI HD44780 is a dot matrix liquid crystal display controller popular in the 1980s. Common display sizes are (columns x lines): 8x1, 16x2, 20x2 and 20x4, able to display up to 80 different characters (ASCII and Japanese Kana). Available modules usually offer 16 contacts, designed to easily connect with the Intel MCS-51 based MCU's XRAM interface.  
@@ -57,6 +59,8 @@ Build the example's machine code objects and link to the libraries' binaries:
 Create the Intel HEX file ready to be flashed into the MCU's firmware:  
 
 >*$ packihx ex1-lcd-8bits.ihx > ex1-lcd-8bits.hex*  
+
+See this code being flashed via AVRISP programmer and running here: https://studio.youtube.com/video/isPWwbw70vc  
 
 # Example 2 - Interfacing the MCU with a HITACHI HD44780 LCD Controller Module (4-bit Data Registers)
 
