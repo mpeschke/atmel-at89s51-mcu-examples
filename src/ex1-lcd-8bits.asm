@@ -1,6 +1,6 @@
 ;--------------------------------------------------------
 ; File Created by SDCC : free open source ANSI-C Compiler
-; Version 3.8.0 #10562 (Linux)
+; Version 4.0.0 #11528 (Mac OS X x86_64)
 ;--------------------------------------------------------
 	.module ex1_lcd_8bits
 	.optsdcc -mmcs51 --model-small
@@ -301,18 +301,18 @@ _HD44780_IR_DISPLAY_CURSOR_HOME_FIRSTLINE:
 _HD44780_IR_DISPLAY_CURSOR_HOME_SECONLINE:
 	.db #0xc0	; 192
 _TWO_SECONDS_MULT:
-	.byte #0x1a,#0x00	;  26
+	.byte #0x1a, #0x00	;  26
 _TWO_SECONDS_HIGHBITS:
 	.db #0x05	; 5
 _TWO_SECONDS_LOWBITS:
 	.db #0x99	; 153
 _FIVE_SECONDS_MULT:
-	.byte #0x40,#0x00	;  64
+	.byte #0x40, #0x00	;  64
 _FIVE_SECONDS_HIGHBITS:
 	.db #0x01	; 1
 _FIVE_SECONDS_LOWBITS:
 	.db #0xaf	; 175
 _DATA_BUS_PULSE_INTERVAL:
-	.byte #0x64,#0x00	;  100
+	.byte #0x64, #0x00	;  100
 	.area XINIT   (CODE)
 	.area CABS    (ABS,CODE)

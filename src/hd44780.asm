@@ -1,6 +1,6 @@
 ;--------------------------------------------------------
 ; File Created by SDCC : free open source ANSI-C Compiler
-; Version 3.8.0 #10562 (Linux)
+; Version 4.0.0 #11528 (Mac OS X x86_64)
 ;--------------------------------------------------------
 	.module hd44780
 	.optsdcc -mmcs51 --model-small
@@ -8,6 +8,8 @@
 ;--------------------------------------------------------
 ; Public variables in this module
 ;--------------------------------------------------------
+	.globl _lcd_drwrite_4bits_bus
+	.globl _lcd_irwrite_4bits_bus
 	.globl _lcd_drwrite
 	.globl _wait_until_not_busy
 	.globl _data_register_write_internal_operation
@@ -15,6 +17,13 @@
 	.globl _instruction_register_read_busyflag_or_add_counter
 	.globl _pulse_enable
 	.globl _delay
+	.globl __LCD_RS
+	.globl __LCD_RW
+	.globl __LCD_EN
+	.globl __BUSY_FLAG
+	.globl __LCD_IR_DR_BUS_6
+	.globl __LCD_IR_DR_BUS_5
+	.globl __LCD_IR_DR_BUS_4
 	.globl _CY
 	.globl _AC
 	.globl _F0
@@ -113,10 +122,6 @@
 	.globl _DPL
 	.globl _SP
 	.globl _P0
-	.globl __LCD_RS
-	.globl __LCD_RW
-	.globl __LCD_EN
-	.globl __BUSY_FLAG
 	.globl _lcd_set_pulse_and_busyflag_delay
 	.globl _lcd_irwrite
 	.globl _lcd_stringwrite
@@ -230,6 +235,13 @@ _RS1	=	0x00d4
 _F0	=	0x00d5
 _AC	=	0x00d6
 _CY	=	0x00d7
+__LCD_IR_DR_BUS_4	=	0x0084
+__LCD_IR_DR_BUS_5	=	0x0085
+__LCD_IR_DR_BUS_6	=	0x0086
+__BUSY_FLAG	=	0x0087
+__LCD_EN	=	0x00a0
+__LCD_RW	=	0x00a1
+__LCD_RS	=	0x00a2
 ;--------------------------------------------------------
 ; overlayable register banks
 ;--------------------------------------------------------
@@ -259,10 +271,6 @@ _DELAY:
 ; bit data
 ;--------------------------------------------------------
 	.area BSEG    (BIT)
-__BUSY_FLAG	=	0x0087
-__LCD_EN	=	0x00a0
-__LCD_RW	=	0x00a1
-__LCD_RS	=	0x00a2
 ;--------------------------------------------------------
 ; paged external ram data
 ;--------------------------------------------------------
@@ -296,7 +304,7 @@ __LCD_RS	=	0x00a2
 	.area GSINIT  (CODE)
 	.area GSFINAL (CODE)
 	.area GSINIT  (CODE)
-;	../lib/hd44780.c:10: static int DELAY = 500;
+;	../lib/hd44780.c:18: static int DELAY = 500;
 	mov	_DELAY,#0xf4
 	mov	(_DELAY + 1),#0x01
 ;--------------------------------------------------------
@@ -313,7 +321,7 @@ __LCD_RS	=	0x00a2
 ;------------------------------------------------------------
 ;pdelay                    Allocated to registers r5 r6 r7 
 ;------------------------------------------------------------
-;	../lib/hd44780.c:15: void lcd_set_pulse_and_busyflag_delay(const int* pdelay)
+;	../lib/hd44780.c:20: void lcd_set_pulse_and_busyflag_delay(const int* pdelay)
 ;	-----------------------------------------
 ;	 function lcd_set_pulse_and_busyflag_delay
 ;	-----------------------------------------
@@ -326,7 +334,7 @@ _lcd_set_pulse_and_busyflag_delay:
 	ar2 = 0x02
 	ar1 = 0x01
 	ar0 = 0x00
-;	../lib/hd44780.c:16: { DELAY = *pdelay; }
+;	../lib/hd44780.c:21: { DELAY = *pdelay; }
 	lcall	__gptrget
 	mov	_DELAY,a
 	inc	dptr
@@ -338,12 +346,12 @@ _lcd_set_pulse_and_busyflag_delay:
 ;------------------------------------------------------------
 ;i                         Allocated to registers r6 r7 
 ;------------------------------------------------------------
-;	../lib/hd44780.c:20: void delay()
+;	../lib/hd44780.c:25: void delay()
 ;	-----------------------------------------
 ;	 function delay
 ;	-----------------------------------------
 _delay:
-;	../lib/hd44780.c:23: for(i=0; i < DELAY; i++);
+;	../lib/hd44780.c:28: for(i=0; i < DELAY; i++);
 	mov	r6,#0x00
 	mov	r7,#0x00
 00103$:
@@ -361,186 +369,142 @@ _delay:
 	inc	r7
 	sjmp	00103$
 00105$:
-;	../lib/hd44780.c:24: }
+;	../lib/hd44780.c:29: }
 	ret
 ;------------------------------------------------------------
 ;Allocation info for local variables in function 'pulse_enable'
 ;------------------------------------------------------------
-;	../lib/hd44780.c:27: void pulse_enable()
+;	../lib/hd44780.c:32: void pulse_enable()
 ;	-----------------------------------------
 ;	 function pulse_enable
 ;	-----------------------------------------
 _pulse_enable:
-;	../lib/hd44780.c:29: _LCD_EN=HIGH;
-	mov	dptr,#_HIGH
-	clr	a
-	movc	a,@a+dptr
+;	../lib/hd44780.c:34: _LCD_EN=1;
 ;	assignBit
-	add	a,#0xff
-	mov	__LCD_EN,c
-;	../lib/hd44780.c:30: delay();
+	setb	__LCD_EN
+;	../lib/hd44780.c:35: delay();
 	lcall	_delay
-;	../lib/hd44780.c:31: _LCD_EN=LOW;
-	mov	dptr,#_LOW
-	clr	a
-	movc	a,@a+dptr
+;	../lib/hd44780.c:36: _LCD_EN=0;
 ;	assignBit
-	add	a,#0xff
-	mov	__LCD_EN,c
-;	../lib/hd44780.c:32: }
+	clr	__LCD_EN
+;	../lib/hd44780.c:37: }
 	ret
 ;------------------------------------------------------------
 ;Allocation info for local variables in function 'instruction_register_read_busyflag_or_add_counter'
 ;------------------------------------------------------------
-;	../lib/hd44780.c:35: void instruction_register_read_busyflag_or_add_counter()
+;	../lib/hd44780.c:40: void instruction_register_read_busyflag_or_add_counter()
 ;	-----------------------------------------
 ;	 function instruction_register_read_busyflag_or_add_counter
 ;	-----------------------------------------
 _instruction_register_read_busyflag_or_add_counter:
-;	../lib/hd44780.c:37: _LCD_RS=LOW;
-	mov	dptr,#_LOW
-	clr	a
-	movc	a,@a+dptr
+;	../lib/hd44780.c:42: _LCD_RS=0;
 ;	assignBit
-	add	a,#0xff
-	mov	__LCD_RS,c
-;	../lib/hd44780.c:38: _LCD_RW=HIGH;
-	mov	dptr,#_HIGH
-	clr	a
-	movc	a,@a+dptr
+	clr	__LCD_RS
+;	../lib/hd44780.c:43: _LCD_RW=1;
 ;	assignBit
-	add	a,#0xff
-	mov	__LCD_RW,c
-;	../lib/hd44780.c:39: }
+	setb	__LCD_RW
+;	../lib/hd44780.c:44: }
 	ret
 ;------------------------------------------------------------
 ;Allocation info for local variables in function 'instruction_register_write_internal_operation'
 ;------------------------------------------------------------
-;	../lib/hd44780.c:42: void instruction_register_write_internal_operation()
+;	../lib/hd44780.c:47: void instruction_register_write_internal_operation()
 ;	-----------------------------------------
 ;	 function instruction_register_write_internal_operation
 ;	-----------------------------------------
 _instruction_register_write_internal_operation:
-;	../lib/hd44780.c:44: _LCD_RS=LOW;
-	mov	dptr,#_LOW
-	clr	a
-	movc	a,@a+dptr
+;	../lib/hd44780.c:49: _LCD_RS=0;
 ;	assignBit
-	add	a,#0xff
-	clr	a
-	rlc	a
+	clr	__LCD_RS
+;	../lib/hd44780.c:50: _LCD_RW=0;
 ;	assignBit
-	mov	r7,a
-	add	a,#0xff
-	mov	__LCD_RS,c
-;	../lib/hd44780.c:45: _LCD_RW=LOW;
-;	assignBit
-	mov	a,r7
-	add	a,#0xff
-	mov	__LCD_RW,c
-;	../lib/hd44780.c:46: }
+	clr	__LCD_RW
+;	../lib/hd44780.c:51: }
 	ret
 ;------------------------------------------------------------
 ;Allocation info for local variables in function 'data_register_write_internal_operation'
 ;------------------------------------------------------------
-;	../lib/hd44780.c:49: void data_register_write_internal_operation()
+;	../lib/hd44780.c:54: void data_register_write_internal_operation()
 ;	-----------------------------------------
 ;	 function data_register_write_internal_operation
 ;	-----------------------------------------
 _data_register_write_internal_operation:
-;	../lib/hd44780.c:51: _LCD_RS=HIGH;
-	mov	dptr,#_HIGH
-	clr	a
-	movc	a,@a+dptr
+;	../lib/hd44780.c:56: _LCD_RS=1;
 ;	assignBit
-	add	a,#0xff
-	mov	__LCD_RS,c
-;	../lib/hd44780.c:52: _LCD_RW=LOW;
-	mov	dptr,#_LOW
-	clr	a
-	movc	a,@a+dptr
+	setb	__LCD_RS
+;	../lib/hd44780.c:57: _LCD_RW=0;
 ;	assignBit
-	add	a,#0xff
-	mov	__LCD_RW,c
-;	../lib/hd44780.c:53: }
+	clr	__LCD_RW
+;	../lib/hd44780.c:58: }
 	ret
 ;------------------------------------------------------------
 ;Allocation info for local variables in function 'wait_until_not_busy'
 ;------------------------------------------------------------
-;	../lib/hd44780.c:65: void wait_until_not_busy()
+;	../lib/hd44780.c:70: void wait_until_not_busy()
 ;	-----------------------------------------
 ;	 function wait_until_not_busy
 ;	-----------------------------------------
 _wait_until_not_busy:
-;	../lib/hd44780.c:67: instruction_register_read_busyflag_or_add_counter();
+;	../lib/hd44780.c:72: instruction_register_read_busyflag_or_add_counter();
 	lcall	_instruction_register_read_busyflag_or_add_counter
-;	../lib/hd44780.c:69: _LCD_EN=HIGH;
-	mov	dptr,#_HIGH
-	clr	a
-	movc	a,@a+dptr
+;	../lib/hd44780.c:74: _LCD_EN=1;
 ;	assignBit
-	mov	r7,a
-	add	a,#0xff
-	mov	__LCD_EN,c
-;	../lib/hd44780.c:71: while (_BUSY_FLAG) {
+	setb	__LCD_EN
+;	../lib/hd44780.c:76: while (_BUSY_FLAG) {
 00101$:
 	jnb	__BUSY_FLAG,00103$
-;	../lib/hd44780.c:72: delay();
+;	../lib/hd44780.c:77: delay();
 	lcall	_delay
 	sjmp	00101$
 00103$:
-;	../lib/hd44780.c:75: _LCD_EN=LOW;
-	mov	dptr,#_LOW
-	clr	a
-	movc	a,@a+dptr
+;	../lib/hd44780.c:80: _LCD_EN=0;
 ;	assignBit
-	add	a,#0xff
-	mov	__LCD_EN,c
-;	../lib/hd44780.c:76: }
+	clr	__LCD_EN
+;	../lib/hd44780.c:81: }
 	ret
 ;------------------------------------------------------------
 ;Allocation info for local variables in function 'lcd_irwrite'
 ;------------------------------------------------------------
 ;ir                        Allocated to registers r7 
 ;------------------------------------------------------------
-;	../lib/hd44780.c:78: void lcd_irwrite(unsigned char ir)
+;	../lib/hd44780.c:83: void lcd_irwrite(unsigned char ir)
 ;	-----------------------------------------
 ;	 function lcd_irwrite
 ;	-----------------------------------------
 _lcd_irwrite:
 	mov	r7,dpl
-;	../lib/hd44780.c:80: wait_until_not_busy();
+;	../lib/hd44780.c:85: wait_until_not_busy();
 	push	ar7
 	lcall	_wait_until_not_busy
-;	../lib/hd44780.c:82: instruction_register_write_internal_operation();
+;	../lib/hd44780.c:87: instruction_register_write_internal_operation();
 	lcall	_instruction_register_write_internal_operation
 	pop	ar7
-;	../lib/hd44780.c:83: _LCD_IR_DR_BUS=ir;
+;	../lib/hd44780.c:88: _LCD_IR_DR_BUS=ir;
 	mov	__LCD_IR_DR_BUS,r7
-;	../lib/hd44780.c:84: pulse_enable();
-;	../lib/hd44780.c:85: }
+;	../lib/hd44780.c:89: pulse_enable();
+;	../lib/hd44780.c:90: }
 	ljmp	_pulse_enable
 ;------------------------------------------------------------
 ;Allocation info for local variables in function 'lcd_drwrite'
 ;------------------------------------------------------------
 ;dr                        Allocated to registers r7 
 ;------------------------------------------------------------
-;	../lib/hd44780.c:90: void lcd_drwrite(unsigned char dr)
+;	../lib/hd44780.c:95: void lcd_drwrite(unsigned char dr)
 ;	-----------------------------------------
 ;	 function lcd_drwrite
 ;	-----------------------------------------
 _lcd_drwrite:
 	mov	r7,dpl
-;	../lib/hd44780.c:92: wait_until_not_busy();
+;	../lib/hd44780.c:97: wait_until_not_busy();
 	push	ar7
 	lcall	_wait_until_not_busy
-;	../lib/hd44780.c:94: data_register_write_internal_operation();
+;	../lib/hd44780.c:99: data_register_write_internal_operation();
 	lcall	_data_register_write_internal_operation
 	pop	ar7
-;	../lib/hd44780.c:95: _LCD_IR_DR_BUS=dr;
+;	../lib/hd44780.c:100: _LCD_IR_DR_BUS=dr;
 	mov	__LCD_IR_DR_BUS,r7
-;	../lib/hd44780.c:96: pulse_enable();
-;	../lib/hd44780.c:97: }
+;	../lib/hd44780.c:101: pulse_enable();
+;	../lib/hd44780.c:102: }
 	ljmp	_pulse_enable
 ;------------------------------------------------------------
 ;Allocation info for local variables in function 'lcd_stringwrite'
@@ -548,7 +512,7 @@ _lcd_drwrite:
 ;pstr                      Allocated to registers r5 r6 r7 
 ;i                         Allocated to registers r4 
 ;------------------------------------------------------------
-;	../lib/hd44780.c:99: void lcd_stringwrite(unsigned char* pstr)
+;	../lib/hd44780.c:104: void lcd_stringwrite(unsigned char* pstr)
 ;	-----------------------------------------
 ;	 function lcd_stringwrite
 ;	-----------------------------------------
@@ -556,7 +520,7 @@ _lcd_stringwrite:
 	mov	r5,dpl
 	mov	r6,dph
 	mov	r7,b
-;	../lib/hd44780.c:102: for(i=0; pstr[i] != 0; i++)
+;	../lib/hd44780.c:107: for(i=0; pstr[i] != 0; i++)
 	mov	r4,#0x00
 00103$:
 	mov	a,r4
@@ -572,7 +536,7 @@ _lcd_stringwrite:
 	lcall	__gptrget
 	mov	r3,a
 	jz	00105$
-;	../lib/hd44780.c:103: lcd_drwrite(pstr[i]);
+;	../lib/hd44780.c:108: lcd_drwrite(pstr[i]);
 	mov	dpl,r3
 	push	ar7
 	push	ar6
@@ -583,41 +547,133 @@ _lcd_stringwrite:
 	pop	ar5
 	pop	ar6
 	pop	ar7
-;	../lib/hd44780.c:102: for(i=0; pstr[i] != 0; i++)
+;	../lib/hd44780.c:107: for(i=0; pstr[i] != 0; i++)
 	inc	r4
 	sjmp	00103$
 00105$:
-;	../lib/hd44780.c:104: }
+;	../lib/hd44780.c:109: }
 	ret
+;------------------------------------------------------------
+;Allocation info for local variables in function 'lcd_irwrite_4bits_bus'
+;------------------------------------------------------------
+;highorderbits             Allocated to registers r7 
+;------------------------------------------------------------
+;	../lib/hd44780.c:117: void lcd_irwrite_4bits_bus(unsigned char highorderbits)
+;	-----------------------------------------
+;	 function lcd_irwrite_4bits_bus
+;	-----------------------------------------
+_lcd_irwrite_4bits_bus:
+	mov	r7,dpl
+;	../lib/hd44780.c:119: wait_until_not_busy();
+	push	ar7
+	lcall	_wait_until_not_busy
+;	../lib/hd44780.c:121: instruction_register_write_internal_operation();
+	lcall	_instruction_register_write_internal_operation
+	pop	ar7
+;	../lib/hd44780.c:122: _LCD_IR_DR_BUS_4 = (highorderbits & (1<<4));
+	mov	a,r7
+	swap	a
+	anl	a,#0x01
+	add	a,#0xff
+	mov	__LCD_IR_DR_BUS_4,c
+;	../lib/hd44780.c:123: _LCD_IR_DR_BUS_5 = (highorderbits & (1<<5));
+	mov	a,r7
+	mov	c,acc[5]
+	clr	a
+	rlc	a
+	add	a,#0xff
+	mov	__LCD_IR_DR_BUS_5,c
+;	../lib/hd44780.c:124: _LCD_IR_DR_BUS_6 = (highorderbits & (1<<6));
+	mov	a,r7
+	rl	a
+	rl	a
+	anl	a,#0x01
+	add	a,#0xff
+	mov	__LCD_IR_DR_BUS_6,c
+;	../lib/hd44780.c:125: _BUSY_FLAG       = (highorderbits & (1<<7));
+	mov	a,r7
+	rl	a
+	anl	a,#0x01
+	add	a,#0xff
+	mov	__BUSY_FLAG,c
+;	../lib/hd44780.c:126: pulse_enable();
+;	../lib/hd44780.c:127: }
+	ljmp	_pulse_enable
+;------------------------------------------------------------
+;Allocation info for local variables in function 'lcd_drwrite_4bits_bus'
+;------------------------------------------------------------
+;highorderbits             Allocated to registers r7 
+;------------------------------------------------------------
+;	../lib/hd44780.c:129: void lcd_drwrite_4bits_bus(unsigned char highorderbits)
+;	-----------------------------------------
+;	 function lcd_drwrite_4bits_bus
+;	-----------------------------------------
+_lcd_drwrite_4bits_bus:
+	mov	r7,dpl
+;	../lib/hd44780.c:131: wait_until_not_busy();
+	push	ar7
+	lcall	_wait_until_not_busy
+;	../lib/hd44780.c:133: data_register_write_internal_operation();
+	lcall	_data_register_write_internal_operation
+	pop	ar7
+;	../lib/hd44780.c:134: _LCD_IR_DR_BUS_4 = (highorderbits & (1<<4));
+	mov	a,r7
+	swap	a
+	anl	a,#0x01
+	add	a,#0xff
+	mov	__LCD_IR_DR_BUS_4,c
+;	../lib/hd44780.c:135: _LCD_IR_DR_BUS_5 = (highorderbits & (1<<5));
+	mov	a,r7
+	mov	c,acc[5]
+	clr	a
+	rlc	a
+	add	a,#0xff
+	mov	__LCD_IR_DR_BUS_5,c
+;	../lib/hd44780.c:136: _LCD_IR_DR_BUS_6 = (highorderbits & (1<<6));
+	mov	a,r7
+	rl	a
+	rl	a
+	anl	a,#0x01
+	add	a,#0xff
+	mov	__LCD_IR_DR_BUS_6,c
+;	../lib/hd44780.c:137: _BUSY_FLAG       = (highorderbits & (1<<7));
+	mov	a,r7
+	rl	a
+	anl	a,#0x01
+	add	a,#0xff
+	mov	__BUSY_FLAG,c
+;	../lib/hd44780.c:138: pulse_enable();
+;	../lib/hd44780.c:139: }
+	ljmp	_pulse_enable
 ;------------------------------------------------------------
 ;Allocation info for local variables in function 'lcd_irwrite_4bits'
 ;------------------------------------------------------------
 ;ir                        Allocated to registers r7 
 ;------------------------------------------------------------
-;	../lib/hd44780.c:112: void lcd_irwrite_4bits(unsigned char ir)
+;	../lib/hd44780.c:141: void lcd_irwrite_4bits(unsigned char ir)
 ;	-----------------------------------------
 ;	 function lcd_irwrite_4bits
 ;	-----------------------------------------
 _lcd_irwrite_4bits:
-;	../lib/hd44780.c:114: lcd_irwrite(ir); // Send first the upper 4 bits.
+;	../lib/hd44780.c:143: lcd_irwrite_4bits_bus(ir);      // Send first the upper 4 bits.
 	mov  r7,dpl
 	push	ar7
-	lcall	_lcd_irwrite
+	lcall	_lcd_irwrite_4bits_bus
 	pop	ar7
-;	../lib/hd44780.c:115: lcd_irwrite(ir << 4); // and then the lower 4 bits.
+;	../lib/hd44780.c:144: lcd_irwrite_4bits_bus(ir << 4); // and then the lower 4 bits.
 	mov	a,r7
 	swap	a
 	anl	a,#0xf0
 	mov	dpl,a
-;	../lib/hd44780.c:116: }
-	ljmp	_lcd_irwrite
+;	../lib/hd44780.c:145: }
+	ljmp	_lcd_irwrite_4bits_bus
 ;------------------------------------------------------------
 ;Allocation info for local variables in function 'lcd_stringwrite_4bits'
 ;------------------------------------------------------------
 ;pstr                      Allocated to registers r5 r6 r7 
 ;i                         Allocated to registers r4 
 ;------------------------------------------------------------
-;	../lib/hd44780.c:118: void lcd_stringwrite_4bits(unsigned char* pstr)
+;	../lib/hd44780.c:147: void lcd_stringwrite_4bits(unsigned char* pstr)
 ;	-----------------------------------------
 ;	 function lcd_stringwrite_4bits
 ;	-----------------------------------------
@@ -625,7 +681,7 @@ _lcd_stringwrite_4bits:
 	mov	r5,dpl
 	mov	r6,dph
 	mov	r7,b
-;	../lib/hd44780.c:121: for(i=0; pstr[i] != 0; i++)
+;	../lib/hd44780.c:150: for(i=0; pstr[i] != 0; i++)
 	mov	r4,#0x00
 00103$:
 	mov	a,r4
@@ -641,7 +697,7 @@ _lcd_stringwrite_4bits:
 	lcall	__gptrget
 	mov	r0,a
 	jz	00105$
-;	../lib/hd44780.c:123: lcd_drwrite(pstr[i]); // Send first the upper 4 bits.
+;	../lib/hd44780.c:152: lcd_drwrite_4bits_bus(pstr[i]);       // Send first the upper 4 bits.
 	mov	dpl,r0
 	push	ar7
 	push	ar6
@@ -650,11 +706,11 @@ _lcd_stringwrite_4bits:
 	push	ar3
 	push	ar2
 	push	ar1
-	lcall	_lcd_drwrite
+	lcall	_lcd_drwrite_4bits_bus
 	pop	ar1
 	pop	ar2
 	pop	ar3
-;	../lib/hd44780.c:124: lcd_drwrite(pstr[i] << 4); // and then the lower 4 bits.
+;	../lib/hd44780.c:153: lcd_drwrite_4bits_bus(pstr[i] << 4);  // and then the lower 4 bits.
 	mov	dpl,r1
 	mov	dph,r2
 	mov	b,r3
@@ -662,16 +718,16 @@ _lcd_stringwrite_4bits:
 	swap	a
 	anl	a,#0xf0
 	mov	dpl,a
-	lcall	_lcd_drwrite
+	lcall	_lcd_drwrite_4bits_bus
 	pop	ar4
 	pop	ar5
 	pop	ar6
 	pop	ar7
-;	../lib/hd44780.c:121: for(i=0; pstr[i] != 0; i++)
+;	../lib/hd44780.c:150: for(i=0; pstr[i] != 0; i++)
 	inc	r4
 	sjmp	00103$
 00105$:
-;	../lib/hd44780.c:126: }
+;	../lib/hd44780.c:155: }
 	ret
 	.area CSEG    (CODE)
 	.area CONST   (CODE)
@@ -689,9 +745,5 @@ _HD44780_IR_DISPLAY_CURSOR_HOME_FIRSTLINE:
 	.db #0x80	; 128
 _HD44780_IR_DISPLAY_CURSOR_HOME_SECONLINE:
 	.db #0xc0	; 192
-_HIGH:
-	.db #0xff	; 255
-_LOW:
-	.db #0x00	; 0
 	.area XINIT   (CODE)
 	.area CABS    (ABS,CODE)
