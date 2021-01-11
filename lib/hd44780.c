@@ -1,16 +1,21 @@
 #include <at89x51.h>
 #include "hd44780.h"
 
-__sfr __at 0x80  _LCD_IR_DR_BUS;  // P0
-__bit __at 0x87  _BUSY_FLAG;      // P0_7
-__bit __at 0xA0  _LCD_EN;         // P2_0
-__bit __at 0xA1  _LCD_RW;         // P2_1
-__bit __at 0xA2  _LCD_RS;         // P2_2
+__sfr __at 0x80  _LCD_IR_DR_BUS;    // P0
+
+//////////////////////////////////////////////////////////
+// High order bits when using a 4bit data/instruction BUS.
+__sbit __at 0x84  _LCD_IR_DR_BUS_4; // P0_4
+__sbit __at 0x85  _LCD_IR_DR_BUS_5; // P0_5
+__sbit __at 0x86  _LCD_IR_DR_BUS_6; // P0_6
+__sbit __at 0x87  _BUSY_FLAG;       // P0_7
+//////////////////////////////////////////////////////////
+
+__sbit __at 0xA0  _LCD_EN;          // P2_0
+__sbit __at 0xA1  _LCD_RW;          // P2_1
+__sbit __at 0xA2  _LCD_RS;          // P2_2
 
 static int DELAY = 500;
-
-static const unsigned char HIGH = 0xff;
-static const unsigned char LOW  = 0x00;
 
 void lcd_set_pulse_and_busyflag_delay(const int* pdelay)
 { DELAY = *pdelay; }
@@ -26,30 +31,30 @@ void delay()
 // 'Pulse Enable' tells the LCD controller that there is data to be read/writen from/to the IR/DR BUS.
 void pulse_enable()
 {
-    _LCD_EN=HIGH;
+    _LCD_EN=1;
     delay();
-    _LCD_EN=LOW;
+    _LCD_EN=0;
 }
 
 // Start BUSY_FLAG read operation or add counter operation.
 void instruction_register_read_busyflag_or_add_counter()
 {
-    _LCD_RS=LOW;
-    _LCD_RW=HIGH;
+    _LCD_RS=0;
+    _LCD_RW=1;
 }
 
 // Set the LCD controller to 'write instruction register'.
 void instruction_register_write_internal_operation()
 {
-    _LCD_RS=LOW;
-    _LCD_RW=LOW;
+    _LCD_RS=0;
+    _LCD_RW=0;
 }
 
 // Set the LCD controller to 'write data register'.
 void data_register_write_internal_operation()
 {
-    _LCD_RS=HIGH;
-    _LCD_RW=LOW;
+    _LCD_RS=1;
+    _LCD_RW=0;
 }
 
 /*
@@ -66,13 +71,13 @@ void wait_until_not_busy()
 {
     instruction_register_read_busyflag_or_add_counter();
 
-    _LCD_EN=HIGH;
+    _LCD_EN=1;
 
     while (_BUSY_FLAG) {
         delay();
     };
     
-    _LCD_EN=LOW;
+    _LCD_EN=0;
 }
 
 void lcd_irwrite(unsigned char ir)
@@ -109,10 +114,34 @@ void lcd_stringwrite(unsigned char* pstr)
 //******************************************************************************
 // 4-BIT BUS FUNCTIONS
 
+void lcd_irwrite_4bits_bus(unsigned char highorderbits)
+{
+    wait_until_not_busy();
+    // Place the Instruction Register on the MCU-LCD BUS.
+    instruction_register_write_internal_operation();
+    _LCD_IR_DR_BUS_4 = (highorderbits & (1<<4));
+    _LCD_IR_DR_BUS_5 = (highorderbits & (1<<5));
+    _LCD_IR_DR_BUS_6 = (highorderbits & (1<<6));
+    _BUSY_FLAG       = (highorderbits & (1<<7));
+    pulse_enable();
+}
+
+void lcd_drwrite_4bits_bus(unsigned char highorderbits)
+{
+    wait_until_not_busy();
+    // Place the Data Register on the MCU-LCD BUS.
+    data_register_write_internal_operation();
+    _LCD_IR_DR_BUS_4 = (highorderbits & (1<<4));
+    _LCD_IR_DR_BUS_5 = (highorderbits & (1<<5));
+    _LCD_IR_DR_BUS_6 = (highorderbits & (1<<6));
+    _BUSY_FLAG       = (highorderbits & (1<<7));
+    pulse_enable();
+}
+
 void lcd_irwrite_4bits(unsigned char ir)
 {
-    lcd_irwrite(ir); // Send first the upper 4 bits.
-    lcd_irwrite(ir << 4); // and then the lower 4 bits.
+    lcd_irwrite_4bits_bus(ir);      // Send first the upper 4 bits.
+    lcd_irwrite_4bits_bus(ir << 4); // and then the lower 4 bits.
 }
 
 void lcd_stringwrite_4bits(unsigned char* pstr)
@@ -120,8 +149,8 @@ void lcd_stringwrite_4bits(unsigned char* pstr)
     unsigned char i;
     for(i=0; pstr[i] != 0; i++)
     {
-        lcd_drwrite(pstr[i]); // Send first the upper 4 bits.
-        lcd_drwrite(pstr[i] << 4); // and then the lower 4 bits.
+        lcd_drwrite_4bits_bus(pstr[i]);       // Send first the upper 4 bits.
+        lcd_drwrite_4bits_bus(pstr[i] << 4);  // and then the lower 4 bits.
     }
 }
 
