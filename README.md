@@ -88,3 +88,25 @@ Create the Intel HEX file ready to be flashed into the MCU's firmware:
 
 >*$ packihx ex2-lcd-4bits.ihx > ex2-lcd-4bits.hex*  
 
+# Example 3 - Interfacing the MCU with a Serial Port and a HITACHI HD44780 LCD Controller Module (4-bit Data Registers)
+
+To build this example:  
+
+>*$ cd src/*  
+
+Build the libraries' machine code objects:  
+
+>*$ sdcc -c ../lib/hd44780.c*  
+
+Create the libraries' lib files:  
+
+>*$ sdar -rc hd44780.lib hd44780.rel*  
+
+Build the example's machine code objects and link to the libraries' binaries:  
+
+>*$ sdcc ex3-serial-lcd-4bits.c hd44780.lib -L hd44780.lib*  
+
+Create the Intel HEX file ready to be flashed into the MCU's firmware:  
+
+>*$ packihx ex3-serial-lcd-4bits.ihx > ex3-serial-lcd-4bits.hex*  
+

@@ -42,6 +42,13 @@ void lcd_stringwrite(unsigned char* pstr);
 // 4-BIT BUS FUNCTIONS
 
 /**
+    Function to send a data register to the LCD controller.
+
+    @param highorderbits the Data Register (only the 4 high bits)
+*/
+void lcd_drwrite_4bits_bus(unsigned char highorderbits);
+
+/**
     Function to send a instruction register to the LCD controller.
 
     @param ir the Instruction Register (LCD Command)
