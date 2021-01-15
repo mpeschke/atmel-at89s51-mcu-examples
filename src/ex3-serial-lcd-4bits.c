@@ -19,8 +19,11 @@ void ex3_ser_handler (void) __interrupt 4
 void initialize_serial(void)
 {
     TMOD = 0x20;    // Timer 1 In Mode 2 -Auto Reload to Generate Baud Rate
-    SCON = 0x50;    // Serial Mode 1, 8-Data Bit, REN Enabled
-    TH1  = 0xFD;    // Load Baud Rate 9600 To Timer Register
+    SCON = 0x50;    // Serial Mode 1, 8-Bit Data, REN Enabled
+    // Load Baud Rate 9600 To Timer Register
+    // TH1 = 256 - (( CRYSTAL OSC / 384) / Baud)
+    // TH1 = 256 - (( 22.118.400 Hz / 384) / 9600) = 256 - 6 = 250d = 0xFAh
+    TH1  = 0xFA;
     TR1  = 1;       // Start Timer
 }
 
@@ -32,7 +35,7 @@ int main()
     
     // Initialization of the LCD by instructions (see HITACHI manual).
     lcd_irwrite_4bits(HD44780_IR_ENABLE_4BIT_IRDR);
-    lcd_irwrite_4bits(HD44780_IR_FIVE_FOUR_TWO_DISPLAY_LINES);
+    lcd_irwrite_4bits(HD44780_IR_5X8_4BITS_TWO_DISPLAY_LINES);
     lcd_irwrite_4bits(HD44780_IR_DISPLAY_ON_CURSOR_ON);
     
     lcd_irwrite_4bits(HD44780_IR_DISPLAY_CURSOR_HOME_FIRSTLINE);
