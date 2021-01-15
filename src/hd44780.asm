@@ -1,6 +1,6 @@
 ;--------------------------------------------------------
 ; File Created by SDCC : free open source ANSI-C Compiler
-; Version 4.0.0 #11528 (Mac OS X x86_64)
+; Version 3.8.0 #10562 (Linux)
 ;--------------------------------------------------------
 	.module hd44780
 	.optsdcc -mmcs51 --model-small
@@ -8,7 +8,6 @@
 ;--------------------------------------------------------
 ; Public variables in this module
 ;--------------------------------------------------------
-	.globl _lcd_drwrite_4bits_bus
 	.globl _lcd_irwrite_4bits_bus
 	.globl _lcd_drwrite
 	.globl _wait_until_not_busy
@@ -125,6 +124,7 @@
 	.globl _lcd_set_pulse_and_busyflag_delay
 	.globl _lcd_irwrite
 	.globl _lcd_stringwrite
+	.globl _lcd_drwrite_4bits_bus
 	.globl _lcd_irwrite_4bits
 	.globl _lcd_stringwrite_4bits
 ;--------------------------------------------------------
@@ -737,9 +737,9 @@ _HD44780_IR_ENABLE_4BIT_IRDR:
 	.db #0x02	; 2
 _HD44780_IR_DISPLAY_ON_CURSOR_ON:
 	.db #0x0e	; 14
-_HD44780_IR_FIVE_EIGHT_TWO_DISPLAY_LINES:
+_HD44780_IR_5X8_8BITS_TWO_DISPLAY_LINES:
 	.db #0x38	; 56	'8'
-_HD44780_IR_FIVE_FOUR_TWO_DISPLAY_LINES:
+_HD44780_IR_5X8_4BITS_TWO_DISPLAY_LINES:
 	.db #0x28	; 40
 _HD44780_IR_DISPLAY_CURSOR_HOME_FIRSTLINE:
 	.db #0x80	; 128

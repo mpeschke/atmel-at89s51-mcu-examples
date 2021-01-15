@@ -42,7 +42,7 @@ int main()
     // Trial and error: 
     // minimum value to enable the LCD to effectively read/write from/to the BUS AND check the BUSY_FLAG.
     lcd_set_pulse_and_busyflag_delay(&DATA_BUS_PULSE_INTERVAL);
-    lcd_irwrite(HD44780_IR_FIVE_EIGHT_TWO_DISPLAY_LINES);
+    lcd_irwrite(HD44780_IR_5X8_8BITS_TWO_DISPLAY_LINES);
     lcd_irwrite(HD44780_IR_DISPLAY_ON_CURSOR_ON);
     
     while(1){

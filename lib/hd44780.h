@@ -6,8 +6,8 @@
 static const unsigned char HD44780_IR_DISPLAY_CLEAR =                   0x01;
 static const unsigned char HD44780_IR_ENABLE_4BIT_IRDR =                0x02;
 static const unsigned char HD44780_IR_DISPLAY_ON_CURSOR_ON =            0x0E;
-static const unsigned char HD44780_IR_FIVE_EIGHT_TWO_DISPLAY_LINES =    0x38;
-static const unsigned char HD44780_IR_FIVE_FOUR_TWO_DISPLAY_LINES =     0x28;
+static const unsigned char HD44780_IR_5X8_8BITS_TWO_DISPLAY_LINES =     0x38;
+static const unsigned char HD44780_IR_5X8_4BITS_TWO_DISPLAY_LINES =     0x28;
 static const unsigned char HD44780_IR_DISPLAY_CURSOR_HOME_FIRSTLINE =   0x80;
 static const unsigned char HD44780_IR_DISPLAY_CURSOR_HOME_SECONLINE =   0xc0;
 

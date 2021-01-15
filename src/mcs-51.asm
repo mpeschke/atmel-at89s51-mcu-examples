@@ -1,6 +1,6 @@
 ;--------------------------------------------------------
 ; File Created by SDCC : free open source ANSI-C Compiler
-; Version 4.0.0 #11528 (Mac OS X x86_64)
+; Version 3.8.0 #10562 (Linux)
 ;--------------------------------------------------------
 	.module mcs_51
 	.optsdcc -mmcs51 --model-small
