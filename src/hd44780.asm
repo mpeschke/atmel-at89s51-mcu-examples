@@ -251,7 +251,7 @@ __LCD_RS	=	0x00a2
 ; internal ram data
 ;--------------------------------------------------------
 	.area DSEG    (DATA)
-_DELAY:
+__DELAY:
 	.ds 2
 ;--------------------------------------------------------
 ; overlayable items in internal ram 
@@ -304,9 +304,9 @@ _DELAY:
 	.area GSINIT  (CODE)
 	.area GSFINAL (CODE)
 	.area GSINIT  (CODE)
-;	../lib/hd44780.c:18: static int DELAY = 500;
-	mov	_DELAY,#0xf4
-	mov	(_DELAY + 1),#0x01
+;	../lib/hd44780.c:18: static int _DELAY = 500;
+	mov	__DELAY,#0xf4
+	mov	(__DELAY + 1),#0x01
 ;--------------------------------------------------------
 ; Home
 ;--------------------------------------------------------
@@ -334,9 +334,9 @@ _lcd_set_pulse_and_busyflag_delay:
 	ar2 = 0x02
 	ar1 = 0x01
 	ar0 = 0x00
-	mov	_DELAY,dpl
-	mov	(_DELAY + 1),dph
-;	../lib/hd44780.c:21: { DELAY = delay; }
+	mov	__DELAY,dpl
+	mov	(__DELAY + 1),dph
+;	../lib/hd44780.c:21: { _DELAY = delay; }
 	ret
 ;------------------------------------------------------------
 ;Allocation info for local variables in function 'delay'
@@ -348,16 +348,16 @@ _lcd_set_pulse_and_busyflag_delay:
 ;	 function delay
 ;	-----------------------------------------
 _delay:
-;	../lib/hd44780.c:28: for(i=0; i < DELAY; i++);
+;	../lib/hd44780.c:28: for(i=0; i < _DELAY; i++);
 	mov	r6,#0x00
 	mov	r7,#0x00
 00103$:
 	clr	c
 	mov	a,r6
-	subb	a,_DELAY
+	subb	a,__DELAY
 	mov	a,r7
 	xrl	a,#0x80
-	mov	b,(_DELAY + 1)
+	mov	b,(__DELAY + 1)
 	xrl	b,#0x80
 	subb	a,b
 	jnc	00105$

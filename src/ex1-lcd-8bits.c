@@ -32,20 +32,20 @@ The following intervals are relevant to the HD44780 controller (in nanoseconds):
 */
 
 // 65535-64102=1433d=0599h
-static const int            TWO_SECONDS_MULT        = 26;
-static const unsigned char  TWO_SECONDS_HIGHBITS    = 0x05;
-static const unsigned char  TWO_SECONDS_LOWBITS     = 0x99;
+static const int            TWO_SECONDS_MULT            = 26;
+static const unsigned char  TWO_SECONDS_HIGHBITS        = 0x05;
+static const unsigned char  TWO_SECONDS_LOWBITS         = 0x99;
 
 // 65535-65104=431d=01AFh
-static const int            FIVE_SECONDS_MULT       = 64;
-static const unsigned char  FIVE_SECONDS_HIGHBITS   = 0x01;
-static const unsigned char  FIVE_SECONDS_LOWBITS    = 0xAF;
+static const int            FIVE_SECONDS_MULT           = 64;
+static const unsigned char  FIVE_SECONDS_HIGHBITS       = 0x01;
+static const unsigned char  FIVE_SECONDS_LOWBITS        = 0xAF;
 
 // TIMER COUNTS=65535-START=33334d => START=32201d=7DC9h
-static const unsigned char  LCD_40000US_START_HIGHBITS = 0x7D;
-static const unsigned char  LCD_40000US_START_LOWBITS  = 0xC9;
+static const unsigned char  LCD_40000US_START_HIGHBITS  = 0x7D;
+static const unsigned char  LCD_40000US_START_LOWBITS   = 0xC9;
 
-static const int            DATA_BUS_PULSE_INTERVAL = 100;
+static const int            DATA_BUS_PULSE_INTERVAL     = 100;
 
 int main()
 {

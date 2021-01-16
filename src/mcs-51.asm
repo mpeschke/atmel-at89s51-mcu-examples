@@ -325,9 +325,9 @@ _mcs51_timer0_delay:
 	mov	r7,dpl
 ;	../lib/mcs-51.c:6: TMOD = M0_0;  // Timer 0 is in use. 16-bit Timer Mode is selected.  
 	mov	_TMOD,#0x01
-;	../lib/mcs-51.c:7: TL0 = tl0;  // Load value for TL0 register
+;	../lib/mcs-51.c:7: TL0 = tl0;    // Load value for TL0 register
 	mov	_TL0,_mcs51_timer0_delay_PARM_2
-;	../lib/mcs-51.c:8: TH0 = th0;  // Load value for TH0 register
+;	../lib/mcs-51.c:8: TH0 = th0;    // Load value for TH0 register
 	mov	_TH0,r7
 ;	../lib/mcs-51.c:9: TR0 = 1;      // Run Timer-0
 ;	assignBit
@@ -351,7 +351,7 @@ _mcs51_timer0_delay:
 ;mult                      Allocated to registers 
 ;cpmult                    Allocated to registers r6 r7 
 ;------------------------------------------------------------
-;	../lib/mcs-51.c:17: void mcs51_mult_max_timer0_delay(const int mult, const unsigned char th0, const unsigned char tl0)
+;	../lib/mcs-51.c:17: void mcs51_mult_max_timer0_delay(const unsigned int mult, const unsigned char th0, const unsigned char tl0)
 ;	-----------------------------------------
 ;	 function mcs51_mult_max_timer0_delay
 ;	-----------------------------------------
@@ -360,14 +360,9 @@ _mcs51_mult_max_timer0_delay:
 	mov	r7,dph
 ;	../lib/mcs-51.c:20: while(cpmult > 0)
 00101$:
-	clr	c
-	clr	a
-	subb	a,r6
-	mov	a,#(0x00 ^ 0x80)
-	mov	b,r7
-	xrl	b,#0x80
-	subb	a,b
-	jnc	00104$
+	mov	a,r6
+	orl	a,r7
+	jz	00104$
 ;	../lib/mcs-51.c:22: mcs51_timer0_delay(th0, tl0);
 	mov	_mcs51_timer0_delay_PARM_2,_mcs51_mult_max_timer0_delay_PARM_3
 	mov	dpl,_mcs51_mult_max_timer0_delay_PARM_2
@@ -399,9 +394,9 @@ _mcs51_timer1_delay:
 	mov	r7,dpl
 ;	../lib/mcs-51.c:29: TMOD = M1_0;  // Timer 1 is in use. 16-bit Timer Mode is selected.  
 	mov	_TMOD,#0x02
-;	../lib/mcs-51.c:30: TL1 = tl1;  // Load value for TL1 register
+;	../lib/mcs-51.c:30: TL1 = tl1;    // Load value for TL1 register
 	mov	_TL1,_mcs51_timer1_delay_PARM_2
-;	../lib/mcs-51.c:31: TH1 = th1;  // Load value for TH1 register
+;	../lib/mcs-51.c:31: TH1 = th1;    // Load value for TH1 register
 	mov	_TH1,r7
 ;	../lib/mcs-51.c:32: TR1 = 1;      // Run Timer-1
 ;	assignBit
@@ -425,7 +420,7 @@ _mcs51_timer1_delay:
 ;mult                      Allocated to registers 
 ;cpmult                    Allocated to registers r6 r7 
 ;------------------------------------------------------------
-;	../lib/mcs-51.c:40: void mcs51_mult_max_timer1_delay(const int mult, const unsigned char th1, const unsigned char tl1)
+;	../lib/mcs-51.c:40: void mcs51_mult_max_timer1_delay(const unsigned int mult, const unsigned char th1, const unsigned char tl1)
 ;	-----------------------------------------
 ;	 function mcs51_mult_max_timer1_delay
 ;	-----------------------------------------
@@ -434,14 +429,9 @@ _mcs51_mult_max_timer1_delay:
 	mov	r7,dph
 ;	../lib/mcs-51.c:43: while(cpmult > 0)
 00101$:
-	clr	c
-	clr	a
-	subb	a,r6
-	mov	a,#(0x00 ^ 0x80)
-	mov	b,r7
-	xrl	b,#0x80
-	subb	a,b
-	jnc	00104$
+	mov	a,r6
+	orl	a,r7
+	jz	00104$
 ;	../lib/mcs-51.c:45: mcs51_timer1_delay(th1, tl1);
 	mov	_mcs51_timer1_delay_PARM_2,_mcs51_mult_max_timer1_delay_PARM_3
 	mov	dpl,_mcs51_mult_max_timer1_delay_PARM_2

@@ -24,7 +24,7 @@ void mcs51_timer1_delay(const unsigned char th1, const unsigned char tl1);
     @param th0  the HIGHER bits of the 16-bit counter start value.
     @param tl0  the LOWER bits of the 16-bit counter start value.
 */
-void mcs51_mult_max_timer0_delay(const int mult, const unsigned char th0, const unsigned char tl0);
+void mcs51_mult_max_timer0_delay(const unsigned int mult, const unsigned char th0, const unsigned char tl0);
 
 /**
     Run the internal timer1 with full 16-bit counter 'mult' times.
@@ -33,6 +33,6 @@ void mcs51_mult_max_timer0_delay(const int mult, const unsigned char th0, const 
     @param pth0  the HIGHER bits of the 16-bit counter start value.
     @param ptl0  the LOWER bits of the 16-bit counter start value.
 */
-void mcs51_mult_max_timer1_delay(const int mult, const unsigned char th0, const unsigned char tl0);
+void mcs51_mult_max_timer1_delay(const unsigned int mult, const unsigned char th0, const unsigned char tl0);
 
 #endif  /* __MCS_51_H */
