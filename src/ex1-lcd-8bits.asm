@@ -10,6 +10,7 @@
 ;--------------------------------------------------------
 	.globl _main
 	.globl _mcs51_mult_max_timer0_delay
+	.globl _mcs51_timer0_delay
 	.globl _lcd_stringwrite
 	.globl _lcd_irwrite
 	.globl _lcd_set_pulse_and_busyflag_delay
@@ -32,11 +33,11 @@
 ; internal ram data
 ;--------------------------------------------------------
 	.area DSEG    (DATA)
-_main_line1_65536_9:
+_main_line1_65536_11:
 	.ds 17
-_main_line2_65536_9:
+_main_line2_65536_11:
 	.ds 17
-_main_refresh_65536_9:
+_main_refresh_65536_11:
 	.ds 17
 ;--------------------------------------------------------
 ; overlayable items in internal ram 
@@ -123,11 +124,11 @@ __sdcc_program_startup:
 ;------------------------------------------------------------
 ;Allocation info for local variables in function 'main'
 ;------------------------------------------------------------
-;line1                     Allocated with name '_main_line1_65536_9'
-;line2                     Allocated with name '_main_line2_65536_9'
-;refresh                   Allocated with name '_main_refresh_65536_9'
+;line1                     Allocated with name '_main_line1_65536_11'
+;line2                     Allocated with name '_main_line2_65536_11'
+;refresh                   Allocated with name '_main_refresh_65536_11'
 ;------------------------------------------------------------
-;	ex1-lcd-8bits.c:35: int main()
+;	ex1-lcd-8bits.c:50: int main()
 ;	-----------------------------------------
 ;	 function main
 ;	-----------------------------------------
@@ -140,149 +141,175 @@ _main:
 	ar2 = 0x02
 	ar1 = 0x01
 	ar0 = 0x00
-;	ex1-lcd-8bits.c:37: unsigned char line1[]={"THIS IS LINE 01!"}, line2[]={"THIS IS LINE 02!"}, refresh[]={"REFRESH IN 5 SEC"};
-	mov	_main_line1_65536_9,#0x54
-	mov	(_main_line1_65536_9 + 0x0001),#0x48
-	mov	(_main_line1_65536_9 + 0x0002),#0x49
-	mov	(_main_line1_65536_9 + 0x0003),#0x53
-	mov	(_main_line1_65536_9 + 0x0004),#0x20
-	mov	(_main_line1_65536_9 + 0x0005),#0x49
-	mov	(_main_line1_65536_9 + 0x0006),#0x53
-	mov	(_main_line1_65536_9 + 0x0007),#0x20
-	mov	(_main_line1_65536_9 + 0x0008),#0x4c
-	mov	(_main_line1_65536_9 + 0x0009),#0x49
-	mov	(_main_line1_65536_9 + 0x000a),#0x4e
-	mov	(_main_line1_65536_9 + 0x000b),#0x45
-	mov	(_main_line1_65536_9 + 0x000c),#0x20
-	mov	(_main_line1_65536_9 + 0x000d),#0x30
-	mov	(_main_line1_65536_9 + 0x000e),#0x31
-	mov	(_main_line1_65536_9 + 0x000f),#0x21
-	mov	(_main_line1_65536_9 + 0x0010),#0x00
-	mov	_main_line2_65536_9,#0x54
-	mov	(_main_line2_65536_9 + 0x0001),#0x48
-	mov	(_main_line2_65536_9 + 0x0002),#0x49
-	mov	(_main_line2_65536_9 + 0x0003),#0x53
-	mov	(_main_line2_65536_9 + 0x0004),#0x20
-	mov	(_main_line2_65536_9 + 0x0005),#0x49
-	mov	(_main_line2_65536_9 + 0x0006),#0x53
-	mov	(_main_line2_65536_9 + 0x0007),#0x20
-	mov	(_main_line2_65536_9 + 0x0008),#0x4c
-	mov	(_main_line2_65536_9 + 0x0009),#0x49
-	mov	(_main_line2_65536_9 + 0x000a),#0x4e
-	mov	(_main_line2_65536_9 + 0x000b),#0x45
-	mov	(_main_line2_65536_9 + 0x000c),#0x20
-	mov	(_main_line2_65536_9 + 0x000d),#0x30
-	mov	(_main_line2_65536_9 + 0x000e),#0x32
-	mov	(_main_line2_65536_9 + 0x000f),#0x21
-	mov	(_main_line2_65536_9 + 0x0010),#0x00
-	mov	_main_refresh_65536_9,#0x52
-	mov	(_main_refresh_65536_9 + 0x0001),#0x45
-	mov	(_main_refresh_65536_9 + 0x0002),#0x46
-	mov	(_main_refresh_65536_9 + 0x0003),#0x52
-	mov	(_main_refresh_65536_9 + 0x0004),#0x45
-	mov	(_main_refresh_65536_9 + 0x0005),#0x53
-	mov	(_main_refresh_65536_9 + 0x0006),#0x48
-	mov	(_main_refresh_65536_9 + 0x0007),#0x20
-	mov	(_main_refresh_65536_9 + 0x0008),#0x49
-	mov	(_main_refresh_65536_9 + 0x0009),#0x4e
-	mov	(_main_refresh_65536_9 + 0x000a),#0x20
-	mov	(_main_refresh_65536_9 + 0x000b),#0x35
-	mov	(_main_refresh_65536_9 + 0x000c),#0x20
-	mov	(_main_refresh_65536_9 + 0x000d),#0x53
-	mov	(_main_refresh_65536_9 + 0x000e),#0x45
-	mov	(_main_refresh_65536_9 + 0x000f),#0x43
-	mov	(_main_refresh_65536_9 + 0x0010),#0x00
-;	ex1-lcd-8bits.c:40: mcs51_mult_max_timer0_delay(&TWO_SECONDS_MULT, &TWO_SECONDS_HIGHBITS, &TWO_SECONDS_LOWBITS);
-	mov	_mcs51_mult_max_timer0_delay_PARM_2,#_TWO_SECONDS_HIGHBITS
-	mov	(_mcs51_mult_max_timer0_delay_PARM_2 + 1),#(_TWO_SECONDS_HIGHBITS >> 8)
-	mov	(_mcs51_mult_max_timer0_delay_PARM_2 + 2),#0x80
-	mov	_mcs51_mult_max_timer0_delay_PARM_3,#_TWO_SECONDS_LOWBITS
-	mov	(_mcs51_mult_max_timer0_delay_PARM_3 + 1),#(_TWO_SECONDS_LOWBITS >> 8)
-	mov	(_mcs51_mult_max_timer0_delay_PARM_3 + 2),#0x80
-	mov	dptr,#_TWO_SECONDS_MULT
-	mov	b,#0x80
-	lcall	_mcs51_mult_max_timer0_delay
-;	ex1-lcd-8bits.c:44: lcd_set_pulse_and_busyflag_delay(&DATA_BUS_PULSE_INTERVAL);
+;	ex1-lcd-8bits.c:52: unsigned char line1[]={"THIS IS LINE 01!"}, line2[]={"THIS IS LINE 02!"}, refresh[]={"REFRESH IN 5 SEC"};
+	mov	_main_line1_65536_11,#0x54
+	mov	(_main_line1_65536_11 + 0x0001),#0x48
+	mov	(_main_line1_65536_11 + 0x0002),#0x49
+	mov	(_main_line1_65536_11 + 0x0003),#0x53
+	mov	(_main_line1_65536_11 + 0x0004),#0x20
+	mov	(_main_line1_65536_11 + 0x0005),#0x49
+	mov	(_main_line1_65536_11 + 0x0006),#0x53
+	mov	(_main_line1_65536_11 + 0x0007),#0x20
+	mov	(_main_line1_65536_11 + 0x0008),#0x4c
+	mov	(_main_line1_65536_11 + 0x0009),#0x49
+	mov	(_main_line1_65536_11 + 0x000a),#0x4e
+	mov	(_main_line1_65536_11 + 0x000b),#0x45
+	mov	(_main_line1_65536_11 + 0x000c),#0x20
+	mov	(_main_line1_65536_11 + 0x000d),#0x30
+	mov	(_main_line1_65536_11 + 0x000e),#0x31
+	mov	(_main_line1_65536_11 + 0x000f),#0x21
+	mov	(_main_line1_65536_11 + 0x0010),#0x00
+	mov	_main_line2_65536_11,#0x54
+	mov	(_main_line2_65536_11 + 0x0001),#0x48
+	mov	(_main_line2_65536_11 + 0x0002),#0x49
+	mov	(_main_line2_65536_11 + 0x0003),#0x53
+	mov	(_main_line2_65536_11 + 0x0004),#0x20
+	mov	(_main_line2_65536_11 + 0x0005),#0x49
+	mov	(_main_line2_65536_11 + 0x0006),#0x53
+	mov	(_main_line2_65536_11 + 0x0007),#0x20
+	mov	(_main_line2_65536_11 + 0x0008),#0x4c
+	mov	(_main_line2_65536_11 + 0x0009),#0x49
+	mov	(_main_line2_65536_11 + 0x000a),#0x4e
+	mov	(_main_line2_65536_11 + 0x000b),#0x45
+	mov	(_main_line2_65536_11 + 0x000c),#0x20
+	mov	(_main_line2_65536_11 + 0x000d),#0x30
+	mov	(_main_line2_65536_11 + 0x000e),#0x32
+	mov	(_main_line2_65536_11 + 0x000f),#0x21
+	mov	(_main_line2_65536_11 + 0x0010),#0x00
+	mov	_main_refresh_65536_11,#0x52
+	mov	(_main_refresh_65536_11 + 0x0001),#0x45
+	mov	(_main_refresh_65536_11 + 0x0002),#0x46
+	mov	(_main_refresh_65536_11 + 0x0003),#0x52
+	mov	(_main_refresh_65536_11 + 0x0004),#0x45
+	mov	(_main_refresh_65536_11 + 0x0005),#0x53
+	mov	(_main_refresh_65536_11 + 0x0006),#0x48
+	mov	(_main_refresh_65536_11 + 0x0007),#0x20
+	mov	(_main_refresh_65536_11 + 0x0008),#0x49
+	mov	(_main_refresh_65536_11 + 0x0009),#0x4e
+	mov	(_main_refresh_65536_11 + 0x000a),#0x20
+	mov	(_main_refresh_65536_11 + 0x000b),#0x35
+	mov	(_main_refresh_65536_11 + 0x000c),#0x20
+	mov	(_main_refresh_65536_11 + 0x000d),#0x53
+	mov	(_main_refresh_65536_11 + 0x000e),#0x45
+	mov	(_main_refresh_65536_11 + 0x000f),#0x43
+	mov	(_main_refresh_65536_11 + 0x0010),#0x00
+;	ex1-lcd-8bits.c:55: mcs51_timer0_delay(LCD_40000US_START_HIGHBITS, LCD_40000US_START_LOWBITS);
+	mov	dptr,#_LCD_40000US_START_HIGHBITS
+	clr	a
+	movc	a,@a+dptr
+	mov	r7,a
+	mov	dptr,#_LCD_40000US_START_LOWBITS
+	clr	a
+	movc	a,@a+dptr
+	mov	_mcs51_timer0_delay_PARM_2,a
+	mov	dpl,r7
+	lcall	_mcs51_timer0_delay
+;	ex1-lcd-8bits.c:59: lcd_set_pulse_and_busyflag_delay(DATA_BUS_PULSE_INTERVAL);
 	mov	dptr,#_DATA_BUS_PULSE_INTERVAL
-	mov	b,#0x80
+	clr	a
+	movc	a,@a+dptr
+	mov	r6,a
+	mov	a,#0x01
+	movc	a,@a+dptr
+	mov	r7,a
+	mov	dpl,r6
+	mov	dph,r7
 	lcall	_lcd_set_pulse_and_busyflag_delay
-;	ex1-lcd-8bits.c:45: lcd_irwrite(HD44780_IR_5X8_8BITS_TWO_DISPLAY_LINES);
+;	ex1-lcd-8bits.c:61: lcd_irwrite(HD44780_IR_5X8_8BITS_TWO_DISPLAY_LINES);
 	mov	dptr,#_HD44780_IR_5X8_8BITS_TWO_DISPLAY_LINES
 	clr	a
 	movc	a,@a+dptr
 	mov	dpl,a
 	lcall	_lcd_irwrite
-;	ex1-lcd-8bits.c:46: lcd_irwrite(HD44780_IR_DISPLAY_ON_CURSOR_ON);
+;	ex1-lcd-8bits.c:62: lcd_irwrite(HD44780_IR_DISPLAY_ON_CURSOR_ON);
 	mov	dptr,#_HD44780_IR_DISPLAY_ON_CURSOR_ON
 	clr	a
 	movc	a,@a+dptr
 	mov	dpl,a
 	lcall	_lcd_irwrite
-;	ex1-lcd-8bits.c:48: while(1){
+;	ex1-lcd-8bits.c:64: while(1){
 00102$:
-;	ex1-lcd-8bits.c:49: lcd_irwrite(HD44780_IR_DISPLAY_CLEAR);
+;	ex1-lcd-8bits.c:65: lcd_irwrite(HD44780_IR_DISPLAY_CLEAR);
 	mov	dptr,#_HD44780_IR_DISPLAY_CLEAR
 	clr	a
 	movc	a,@a+dptr
 	mov	dpl,a
 	lcall	_lcd_irwrite
-;	ex1-lcd-8bits.c:50: lcd_irwrite(HD44780_IR_DISPLAY_CURSOR_HOME_FIRSTLINE);
+;	ex1-lcd-8bits.c:66: lcd_irwrite(HD44780_IR_DISPLAY_CURSOR_HOME_FIRSTLINE);
 	mov	dptr,#_HD44780_IR_DISPLAY_CURSOR_HOME_FIRSTLINE
 	clr	a
 	movc	a,@a+dptr
 	mov	dpl,a
 	lcall	_lcd_irwrite
-;	ex1-lcd-8bits.c:51: lcd_stringwrite(refresh);
-	mov	dptr,#_main_refresh_65536_9
+;	ex1-lcd-8bits.c:67: lcd_stringwrite(refresh);
+	mov	dptr,#_main_refresh_65536_11
 	mov	b,#0x40
 	lcall	_lcd_stringwrite
-;	ex1-lcd-8bits.c:53: mcs51_mult_max_timer0_delay(&FIVE_SECONDS_MULT, &FIVE_SECONDS_HIGHBITS, &FIVE_SECONDS_LOWBITS);
-	mov	_mcs51_mult_max_timer0_delay_PARM_2,#_FIVE_SECONDS_HIGHBITS
-	mov	(_mcs51_mult_max_timer0_delay_PARM_2 + 1),#(_FIVE_SECONDS_HIGHBITS >> 8)
-	mov	(_mcs51_mult_max_timer0_delay_PARM_2 + 2),#0x80
-	mov	_mcs51_mult_max_timer0_delay_PARM_3,#_FIVE_SECONDS_LOWBITS
-	mov	(_mcs51_mult_max_timer0_delay_PARM_3 + 1),#(_FIVE_SECONDS_LOWBITS >> 8)
-	mov	(_mcs51_mult_max_timer0_delay_PARM_3 + 2),#0x80
+;	ex1-lcd-8bits.c:69: mcs51_mult_max_timer0_delay(FIVE_SECONDS_MULT, FIVE_SECONDS_HIGHBITS, FIVE_SECONDS_LOWBITS);
 	mov	dptr,#_FIVE_SECONDS_MULT
-	mov	b,#0x80
+	clr	a
+	movc	a,@a+dptr
+	mov	r6,a
+	mov	a,#0x01
+	movc	a,@a+dptr
+	mov	r7,a
+	mov	dptr,#_FIVE_SECONDS_HIGHBITS
+	clr	a
+	movc	a,@a+dptr
+	mov	_mcs51_mult_max_timer0_delay_PARM_2,a
+	mov	dptr,#_FIVE_SECONDS_LOWBITS
+	clr	a
+	movc	a,@a+dptr
+	mov	_mcs51_mult_max_timer0_delay_PARM_3,a
+	mov	dpl,r6
+	mov	dph,r7
 	lcall	_mcs51_mult_max_timer0_delay
-;	ex1-lcd-8bits.c:54: lcd_irwrite(HD44780_IR_DISPLAY_CLEAR);
+;	ex1-lcd-8bits.c:70: lcd_irwrite(HD44780_IR_DISPLAY_CLEAR);
 	mov	dptr,#_HD44780_IR_DISPLAY_CLEAR
 	clr	a
 	movc	a,@a+dptr
 	mov	dpl,a
 	lcall	_lcd_irwrite
-;	ex1-lcd-8bits.c:55: lcd_irwrite(HD44780_IR_DISPLAY_CURSOR_HOME_FIRSTLINE);
+;	ex1-lcd-8bits.c:71: lcd_irwrite(HD44780_IR_DISPLAY_CURSOR_HOME_FIRSTLINE);
 	mov	dptr,#_HD44780_IR_DISPLAY_CURSOR_HOME_FIRSTLINE
 	clr	a
 	movc	a,@a+dptr
 	mov	dpl,a
 	lcall	_lcd_irwrite
-;	ex1-lcd-8bits.c:57: lcd_stringwrite(line1);
-	mov	dptr,#_main_line1_65536_9
+;	ex1-lcd-8bits.c:73: lcd_stringwrite(line1);
+	mov	dptr,#_main_line1_65536_11
 	mov	b,#0x40
 	lcall	_lcd_stringwrite
-;	ex1-lcd-8bits.c:59: lcd_irwrite(HD44780_IR_DISPLAY_CURSOR_HOME_SECONLINE);
+;	ex1-lcd-8bits.c:75: lcd_irwrite(HD44780_IR_DISPLAY_CURSOR_HOME_SECONLINE);
 	mov	dptr,#_HD44780_IR_DISPLAY_CURSOR_HOME_SECONLINE
 	clr	a
 	movc	a,@a+dptr
 	mov	dpl,a
 	lcall	_lcd_irwrite
-;	ex1-lcd-8bits.c:60: lcd_stringwrite(line2);
-	mov	dptr,#_main_line2_65536_9
+;	ex1-lcd-8bits.c:76: lcd_stringwrite(line2);
+	mov	dptr,#_main_line2_65536_11
 	mov	b,#0x40
 	lcall	_lcd_stringwrite
-;	ex1-lcd-8bits.c:61: mcs51_mult_max_timer0_delay(&TWO_SECONDS_MULT, &TWO_SECONDS_HIGHBITS, &TWO_SECONDS_LOWBITS);
-	mov	_mcs51_mult_max_timer0_delay_PARM_2,#_TWO_SECONDS_HIGHBITS
-	mov	(_mcs51_mult_max_timer0_delay_PARM_2 + 1),#(_TWO_SECONDS_HIGHBITS >> 8)
-	mov	(_mcs51_mult_max_timer0_delay_PARM_2 + 2),#0x80
-	mov	_mcs51_mult_max_timer0_delay_PARM_3,#_TWO_SECONDS_LOWBITS
-	mov	(_mcs51_mult_max_timer0_delay_PARM_3 + 1),#(_TWO_SECONDS_LOWBITS >> 8)
-	mov	(_mcs51_mult_max_timer0_delay_PARM_3 + 2),#0x80
+;	ex1-lcd-8bits.c:77: mcs51_mult_max_timer0_delay(TWO_SECONDS_MULT, TWO_SECONDS_HIGHBITS, TWO_SECONDS_LOWBITS);
 	mov	dptr,#_TWO_SECONDS_MULT
-	mov	b,#0x80
+	clr	a
+	movc	a,@a+dptr
+	mov	r6,a
+	mov	a,#0x01
+	movc	a,@a+dptr
+	mov	r7,a
+	mov	dptr,#_TWO_SECONDS_HIGHBITS
+	clr	a
+	movc	a,@a+dptr
+	mov	_mcs51_mult_max_timer0_delay_PARM_2,a
+	mov	dptr,#_TWO_SECONDS_LOWBITS
+	clr	a
+	movc	a,@a+dptr
+	mov	_mcs51_mult_max_timer0_delay_PARM_3,a
+	mov	dpl,r6
+	mov	dph,r7
 	lcall	_mcs51_mult_max_timer0_delay
-;	ex1-lcd-8bits.c:63: }
+;	ex1-lcd-8bits.c:79: }
 	ljmp	00102$
 	.area CSEG    (CODE)
 	.area CONST   (CODE)
@@ -312,6 +339,10 @@ _FIVE_SECONDS_HIGHBITS:
 	.db #0x01	; 1
 _FIVE_SECONDS_LOWBITS:
 	.db #0xaf	; 175
+_LCD_40000US_START_HIGHBITS:
+	.db #0x7d	; 125
+_LCD_40000US_START_LOWBITS:
+	.db #0xc9	; 201
 _DATA_BUS_PULSE_INTERVAL:
 	.byte #0x64,#0x00	;  100
 	.area XINIT   (CODE)

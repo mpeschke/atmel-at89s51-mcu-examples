@@ -16,7 +16,7 @@ static const unsigned char HD44780_IR_DISPLAY_CURSOR_HOME_SECONLINE =   0xc0;
 
     @param pdelay pointer to a number of iterations (delay loop)
 */
-void lcd_set_pulse_and_busyflag_delay(const int* pdelay);
+void lcd_set_pulse_and_busyflag_delay(const int delay);
 
 //******************************************************************************
 // 8-BIT BUS FUNCTIONS
@@ -26,14 +26,14 @@ void lcd_set_pulse_and_busyflag_delay(const int* pdelay);
 
     @param ir the Instruction Register (LCD Command)
 */
-void lcd_irwrite(unsigned char ir);
+void lcd_irwrite(const unsigned char ir);
 
 /**
     Function to send a string to the LCD controller - each character at a time (each character is a 8-bit data register).
 
     @param pstr pointer to a string
 */
-void lcd_stringwrite(unsigned char* pstr);
+void lcd_stringwrite(const unsigned char* pstr);
 
 // 8-BIT BUS FUNCTIONS
 //******************************************************************************
@@ -46,21 +46,21 @@ void lcd_stringwrite(unsigned char* pstr);
 
     @param highorderbits the Data Register (only the 4 high bits)
 */
-void lcd_drwrite_4bits_bus(unsigned char highorderbits);
+void lcd_drwrite_4bits_bus(const unsigned char highorderbits);
 
 /**
     Function to send a instruction register to the LCD controller.
 
     @param ir the Instruction Register (LCD Command)
 */
-void lcd_irwrite_4bits(unsigned char ir);
+void lcd_irwrite_4bits(const unsigned char ir);
 
 /**
     Function to send a string to the LCD controller - each character at a time (each character is a 8-bit data register).
 
     @param pstr pointer to a string
 */
-void lcd_stringwrite_4bits(unsigned char* pstr);
+void lcd_stringwrite_4bits(const unsigned char* pstr);
 
 // 4-BIT BUS FUNCTIONS
 //******************************************************************************

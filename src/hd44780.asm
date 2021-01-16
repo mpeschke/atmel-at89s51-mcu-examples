@@ -319,9 +319,9 @@ _DELAY:
 ;------------------------------------------------------------
 ;Allocation info for local variables in function 'lcd_set_pulse_and_busyflag_delay'
 ;------------------------------------------------------------
-;pdelay                    Allocated to registers r5 r6 r7 
+;delay                     Allocated to registers 
 ;------------------------------------------------------------
-;	../lib/hd44780.c:20: void lcd_set_pulse_and_busyflag_delay(const int* pdelay)
+;	../lib/hd44780.c:20: void lcd_set_pulse_and_busyflag_delay(const int delay)
 ;	-----------------------------------------
 ;	 function lcd_set_pulse_and_busyflag_delay
 ;	-----------------------------------------
@@ -334,12 +334,9 @@ _lcd_set_pulse_and_busyflag_delay:
 	ar2 = 0x02
 	ar1 = 0x01
 	ar0 = 0x00
-;	../lib/hd44780.c:21: { DELAY = *pdelay; }
-	lcall	__gptrget
-	mov	_DELAY,a
-	inc	dptr
-	lcall	__gptrget
-	mov	(_DELAY + 1),a
+	mov	_DELAY,dpl
+	mov	(_DELAY + 1),dph
+;	../lib/hd44780.c:21: { DELAY = delay; }
 	ret
 ;------------------------------------------------------------
 ;Allocation info for local variables in function 'delay'
@@ -467,7 +464,7 @@ _wait_until_not_busy:
 ;------------------------------------------------------------
 ;ir                        Allocated to registers r7 
 ;------------------------------------------------------------
-;	../lib/hd44780.c:83: void lcd_irwrite(unsigned char ir)
+;	../lib/hd44780.c:83: void lcd_irwrite(const unsigned char ir)
 ;	-----------------------------------------
 ;	 function lcd_irwrite
 ;	-----------------------------------------
@@ -489,7 +486,7 @@ _lcd_irwrite:
 ;------------------------------------------------------------
 ;dr                        Allocated to registers r7 
 ;------------------------------------------------------------
-;	../lib/hd44780.c:95: void lcd_drwrite(unsigned char dr)
+;	../lib/hd44780.c:95: void lcd_drwrite(const unsigned char dr)
 ;	-----------------------------------------
 ;	 function lcd_drwrite
 ;	-----------------------------------------
@@ -512,7 +509,7 @@ _lcd_drwrite:
 ;pstr                      Allocated to registers r5 r6 r7 
 ;i                         Allocated to registers r4 
 ;------------------------------------------------------------
-;	../lib/hd44780.c:104: void lcd_stringwrite(unsigned char* pstr)
+;	../lib/hd44780.c:104: void lcd_stringwrite(const unsigned char* pstr)
 ;	-----------------------------------------
 ;	 function lcd_stringwrite
 ;	-----------------------------------------
@@ -558,7 +555,7 @@ _lcd_stringwrite:
 ;------------------------------------------------------------
 ;highorderbits             Allocated to registers r7 
 ;------------------------------------------------------------
-;	../lib/hd44780.c:117: void lcd_irwrite_4bits_bus(unsigned char highorderbits)
+;	../lib/hd44780.c:117: void lcd_irwrite_4bits_bus(const unsigned char highorderbits)
 ;	-----------------------------------------
 ;	 function lcd_irwrite_4bits_bus
 ;	-----------------------------------------
@@ -604,7 +601,7 @@ _lcd_irwrite_4bits_bus:
 ;------------------------------------------------------------
 ;highorderbits             Allocated to registers r7 
 ;------------------------------------------------------------
-;	../lib/hd44780.c:129: void lcd_drwrite_4bits_bus(unsigned char highorderbits)
+;	../lib/hd44780.c:129: void lcd_drwrite_4bits_bus(const unsigned char highorderbits)
 ;	-----------------------------------------
 ;	 function lcd_drwrite_4bits_bus
 ;	-----------------------------------------
@@ -650,7 +647,7 @@ _lcd_drwrite_4bits_bus:
 ;------------------------------------------------------------
 ;ir                        Allocated to registers r7 
 ;------------------------------------------------------------
-;	../lib/hd44780.c:141: void lcd_irwrite_4bits(unsigned char ir)
+;	../lib/hd44780.c:141: void lcd_irwrite_4bits(const unsigned char ir)
 ;	-----------------------------------------
 ;	 function lcd_irwrite_4bits
 ;	-----------------------------------------
@@ -673,7 +670,7 @@ _lcd_irwrite_4bits:
 ;pstr                      Allocated to registers r5 r6 r7 
 ;i                         Allocated to registers r4 
 ;------------------------------------------------------------
-;	../lib/hd44780.c:147: void lcd_stringwrite_4bits(unsigned char* pstr)
+;	../lib/hd44780.c:147: void lcd_stringwrite_4bits(const unsigned char* pstr)
 ;	-----------------------------------------
 ;	 function lcd_stringwrite_4bits
 ;	-----------------------------------------

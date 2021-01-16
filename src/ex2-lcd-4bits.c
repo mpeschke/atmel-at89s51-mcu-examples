@@ -37,7 +37,6 @@ static const unsigned char  FIVE_SECONDS_HIGHBITS   = 0x01;
 static const unsigned char  FIVE_SECONDS_LOWBITS    = 0xAF;
 
 // TIMER COUNTS=65535-START=33334d => START=32201d=7DC9h
-static const int            LCD_40000US_START_MULT     = 1;
 static const unsigned char  LCD_40000US_START_HIGHBITS = 0x7D;
 static const unsigned char  LCD_40000US_START_LOWBITS  = 0xC9;
 
@@ -47,12 +46,12 @@ int main()
 {
     unsigned char line[]={"FEDCBA9876543210"};
     
-    // More than enough time to properly initialize the LCD hardware.
-    mcs51_mult_max_timer0_delay(&LCD_40000US_START_MULT, &LCD_40000US_START_HIGHBITS, &LCD_40000US_START_LOWBITS);
+    // 40 ms to initialize the LCD controller.
+    mcs51_timer0_delay(LCD_40000US_START_HIGHBITS, LCD_40000US_START_LOWBITS);
 
     // Trial and error: 
     // minimum value to enable the LCD to effectively read/write from/to the BUS AND check the BUSY_FLAG.
-    lcd_set_pulse_and_busyflag_delay(&DATA_BUS_PULSE_INTERVAL);
+    lcd_set_pulse_and_busyflag_delay(DATA_BUS_PULSE_INTERVAL);
     
     // Initialization of the LCD by instructions (see HITACHI manual).
     lcd_irwrite_4bits(HD44780_IR_ENABLE_4BIT_IRDR);
@@ -60,7 +59,7 @@ int main()
     lcd_irwrite_4bits(HD44780_IR_DISPLAY_ON_CURSOR_ON);
     
     while(1){
-        mcs51_mult_max_timer0_delay(&FIVE_SECONDS_MULT, &FIVE_SECONDS_HIGHBITS, &FIVE_SECONDS_LOWBITS);
+        mcs51_mult_max_timer0_delay(FIVE_SECONDS_MULT, FIVE_SECONDS_HIGHBITS, FIVE_SECONDS_LOWBITS);
 
         lcd_irwrite_4bits(HD44780_IR_DISPLAY_CLEAR);
         lcd_irwrite_4bits(HD44780_IR_DISPLAY_CURSOR_HOME_FIRSTLINE);

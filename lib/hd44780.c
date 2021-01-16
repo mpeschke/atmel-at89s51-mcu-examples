@@ -17,8 +17,8 @@ __sbit __at 0xA2  _LCD_RS;          // P2_2
 
 static int DELAY = 500;
 
-void lcd_set_pulse_and_busyflag_delay(const int* pdelay)
-{ DELAY = *pdelay; }
+void lcd_set_pulse_and_busyflag_delay(const int delay)
+{ DELAY = delay; }
 
 // Adds a 'delay' while waiting for a LCD controller response.
 // See 'LCD_set_busyflag_check_delay' and 'wait_until_not_busy' functions.
@@ -80,7 +80,7 @@ void wait_until_not_busy()
     _LCD_EN=0;
 }
 
-void lcd_irwrite(unsigned char ir)
+void lcd_irwrite(const unsigned char ir)
 {
     wait_until_not_busy();
     // Place the Instruction Register on the MCU-LCD BUS.
@@ -92,7 +92,7 @@ void lcd_irwrite(unsigned char ir)
 //******************************************************************************
 // 8-BIT BUS FUNCTIONS
 
-void lcd_drwrite(unsigned char dr)
+void lcd_drwrite(const unsigned char dr)
 {
     wait_until_not_busy();
     // Place the Data Register on the MCU-LCD BUS.
@@ -101,7 +101,7 @@ void lcd_drwrite(unsigned char dr)
     pulse_enable();
 }
 
-void lcd_stringwrite(unsigned char* pstr)
+void lcd_stringwrite(const unsigned char* pstr)
 {
     unsigned char i;
     for(i=0; pstr[i] != 0; i++)
@@ -114,7 +114,7 @@ void lcd_stringwrite(unsigned char* pstr)
 //******************************************************************************
 // 4-BIT BUS FUNCTIONS
 
-void lcd_irwrite_4bits_bus(unsigned char highorderbits)
+void lcd_irwrite_4bits_bus(const unsigned char highorderbits)
 {
     wait_until_not_busy();
     // Place the Instruction Register on the MCU-LCD BUS.
@@ -126,7 +126,7 @@ void lcd_irwrite_4bits_bus(unsigned char highorderbits)
     pulse_enable();
 }
 
-void lcd_drwrite_4bits_bus(unsigned char highorderbits)
+void lcd_drwrite_4bits_bus(const unsigned char highorderbits)
 {
     wait_until_not_busy();
     // Place the Data Register on the MCU-LCD BUS.
@@ -138,13 +138,13 @@ void lcd_drwrite_4bits_bus(unsigned char highorderbits)
     pulse_enable();
 }
 
-void lcd_irwrite_4bits(unsigned char ir)
+void lcd_irwrite_4bits(const unsigned char ir)
 {
     lcd_irwrite_4bits_bus(ir);      // Send first the upper 4 bits.
     lcd_irwrite_4bits_bus(ir << 4); // and then the lower 4 bits.
 }
 
-void lcd_stringwrite_4bits(unsigned char* pstr)
+void lcd_stringwrite_4bits(const unsigned char* pstr)
 {
     unsigned char i;
     for(i=0; pstr[i] != 0; i++)
