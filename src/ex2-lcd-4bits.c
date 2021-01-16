@@ -32,7 +32,7 @@ The following intervals are relevant to the HD44780 controller (in nanoseconds):
 */
 
 // 65535-65104=431d=01AFh
-static const int            FIVE_SECONDS_MULT           = 64;
+static const unsigned int   FIVE_SECONDS_MULT           = 64;
 static const unsigned char  FIVE_SECONDS_HIGHBITS       = 0x01;
 static const unsigned char  FIVE_SECONDS_LOWBITS        = 0xAF;
 
