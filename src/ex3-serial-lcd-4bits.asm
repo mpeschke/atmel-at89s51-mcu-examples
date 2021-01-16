@@ -339,7 +339,7 @@ __sdcc_program_startup:
 ;------------------------------------------------------------
 ;chr                       Allocated to registers r7 
 ;------------------------------------------------------------
-;	ex3-serial-lcd-4bits.c:42: void ex3_ser_handler (void) __interrupt 4
+;	ex3-serial-lcd-4bits.c:43: void ex3_ser_handler (void) __interrupt 4
 ;	-----------------------------------------
 ;	 function ex3_ser_handler
 ;	-----------------------------------------
@@ -367,28 +367,28 @@ _ex3_ser_handler:
 	push	(0+0)
 	push	psw
 	mov	psw,#0x00
-;	ex3-serial-lcd-4bits.c:44: char chr = 0x00;
+;	ex3-serial-lcd-4bits.c:45: char chr = 0x00;
 	mov	r7,#0x00
-;	ex3-serial-lcd-4bits.c:45: if(RI==1) {
+;	ex3-serial-lcd-4bits.c:46: if(RI==1) {
 	jnb	_RI,00102$
-;	ex3-serial-lcd-4bits.c:46: chr = SBUF;
+;	ex3-serial-lcd-4bits.c:47: chr = SBUF;
 	mov	r7,_SBUF
-;	ex3-serial-lcd-4bits.c:47: RI = 0;
+;	ex3-serial-lcd-4bits.c:48: RI = 0;
 ;	assignBit
 	clr	_RI
 00102$:
-;	ex3-serial-lcd-4bits.c:50: lcd_drwrite_4bits_bus(chr);
+;	ex3-serial-lcd-4bits.c:51: lcd_drwrite_4bits_bus(chr);
 	mov	dpl,r7
 	push	ar7
 	lcall	_lcd_drwrite_4bits_bus
 	pop	ar7
-;	ex3-serial-lcd-4bits.c:51: lcd_drwrite_4bits_bus(chr << 4);
+;	ex3-serial-lcd-4bits.c:52: lcd_drwrite_4bits_bus(chr << 4);
 	mov	a,r7
 	swap	a
 	anl	a,#0xf0
 	mov	dpl,a
 	lcall	_lcd_drwrite_4bits_bus
-;	ex3-serial-lcd-4bits.c:52: }
+;	ex3-serial-lcd-4bits.c:53: }
 	pop	psw
 	pop	(0+0)
 	pop	(0+1)
@@ -407,31 +407,31 @@ _ex3_ser_handler:
 ;------------------------------------------------------------
 ;Allocation info for local variables in function 'initialize_serial'
 ;------------------------------------------------------------
-;	ex3-serial-lcd-4bits.c:54: void initialize_serial(void)
+;	ex3-serial-lcd-4bits.c:55: void initialize_serial(void)
 ;	-----------------------------------------
 ;	 function initialize_serial
 ;	-----------------------------------------
 _initialize_serial:
-;	ex3-serial-lcd-4bits.c:56: TMOD = 0x20;    // Timer 1 In Mode 2 -Auto Reload to Generate Baud Rate
+;	ex3-serial-lcd-4bits.c:57: TMOD = 0x20;    // Timer 1 In Mode 2 -Auto Reload to Generate Baud Rate
 	mov	_TMOD,#0x20
-;	ex3-serial-lcd-4bits.c:57: SCON = 0x50;    // Serial Mode 1, 8-Bit Data, REN Enabled
+;	ex3-serial-lcd-4bits.c:58: SCON = 0x50;    // Serial Mode 1, 8-Bit Data, REN Enabled
 	mov	_SCON,#0x50
-;	ex3-serial-lcd-4bits.c:61: TH1  = 0xFA;
+;	ex3-serial-lcd-4bits.c:62: TH1  = 0xFA;
 	mov	_TH1,#0xfa
-;	ex3-serial-lcd-4bits.c:62: TR1  = 1;       // Start Timer
+;	ex3-serial-lcd-4bits.c:63: TR1  = 1;       // Start Timer
 ;	assignBit
 	setb	_TR1
-;	ex3-serial-lcd-4bits.c:63: }
+;	ex3-serial-lcd-4bits.c:64: }
 	ret
 ;------------------------------------------------------------
 ;Allocation info for local variables in function 'main'
 ;------------------------------------------------------------
-;	ex3-serial-lcd-4bits.c:65: int main()
+;	ex3-serial-lcd-4bits.c:66: int main()
 ;	-----------------------------------------
 ;	 function main
 ;	-----------------------------------------
 _main:
-;	ex3-serial-lcd-4bits.c:68: mcs51_timer0_delay(LCD_40000US_START_HIGHBITS, LCD_40000US_START_LOWBITS);
+;	ex3-serial-lcd-4bits.c:69: mcs51_timer0_delay(LCD_40000US_START_HIGHBITS, LCD_40000US_START_LOWBITS);
 	mov	dptr,#_LCD_40000US_START_HIGHBITS
 	clr	a
 	movc	a,@a+dptr
@@ -442,7 +442,7 @@ _main:
 	mov	_mcs51_timer0_delay_PARM_2,a
 	mov	dpl,r7
 	lcall	_mcs51_timer0_delay
-;	ex3-serial-lcd-4bits.c:72: lcd_set_pulse_and_busyflag_delay(DATA_BUS_PULSE_INTERVAL);
+;	ex3-serial-lcd-4bits.c:73: lcd_set_pulse_and_busyflag_delay(DATA_BUS_PULSE_INTERVAL);
 	mov	dptr,#_DATA_BUS_PULSE_INTERVAL
 	clr	a
 	movc	a,@a+dptr
@@ -453,45 +453,45 @@ _main:
 	mov	dpl,r6
 	mov	dph,r7
 	lcall	_lcd_set_pulse_and_busyflag_delay
-;	ex3-serial-lcd-4bits.c:75: lcd_irwrite_4bits(HD44780_IR_ENABLE_4BIT_IRDR);
+;	ex3-serial-lcd-4bits.c:76: lcd_irwrite_4bits(HD44780_IR_ENABLE_4BIT_IRDR);
 	mov	dptr,#_HD44780_IR_ENABLE_4BIT_IRDR
 	clr	a
 	movc	a,@a+dptr
 	mov	dpl,a
 	lcall	_lcd_irwrite_4bits
-;	ex3-serial-lcd-4bits.c:76: lcd_irwrite_4bits(HD44780_IR_5X8_4BITS_TWO_DISPLAY_LINES);
+;	ex3-serial-lcd-4bits.c:77: lcd_irwrite_4bits(HD44780_IR_5X8_4BITS_TWO_DISPLAY_LINES);
 	mov	dptr,#_HD44780_IR_5X8_4BITS_TWO_DISPLAY_LINES
 	clr	a
 	movc	a,@a+dptr
 	mov	dpl,a
 	lcall	_lcd_irwrite_4bits
-;	ex3-serial-lcd-4bits.c:77: lcd_irwrite_4bits(HD44780_IR_DISPLAY_ON_CURSOR_ON);
+;	ex3-serial-lcd-4bits.c:78: lcd_irwrite_4bits(HD44780_IR_DISPLAY_ON_CURSOR_ON);
 	mov	dptr,#_HD44780_IR_DISPLAY_ON_CURSOR_ON
 	clr	a
 	movc	a,@a+dptr
 	mov	dpl,a
 	lcall	_lcd_irwrite_4bits
-;	ex3-serial-lcd-4bits.c:79: lcd_irwrite_4bits(HD44780_IR_DISPLAY_CURSOR_HOME_FIRSTLINE);
+;	ex3-serial-lcd-4bits.c:80: lcd_irwrite_4bits(HD44780_IR_DISPLAY_CURSOR_HOME_FIRSTLINE);
 	mov	dptr,#_HD44780_IR_DISPLAY_CURSOR_HOME_FIRSTLINE
 	clr	a
 	movc	a,@a+dptr
 	mov	dpl,a
 	lcall	_lcd_irwrite_4bits
-;	ex3-serial-lcd-4bits.c:80: lcd_stringwrite_4bits(FIRST_LINE_BUFF);
+;	ex3-serial-lcd-4bits.c:81: lcd_stringwrite_4bits(FIRST_LINE_BUFF);
 	mov	dptr,#_FIRST_LINE_BUFF
 	mov	b,#0x80
 	lcall	_lcd_stringwrite_4bits
-;	ex3-serial-lcd-4bits.c:81: lcd_irwrite_4bits(HD44780_IR_DISPLAY_CURSOR_HOME_SECONLINE);
+;	ex3-serial-lcd-4bits.c:82: lcd_irwrite_4bits(HD44780_IR_DISPLAY_CURSOR_HOME_SECONLINE);
 	mov	dptr,#_HD44780_IR_DISPLAY_CURSOR_HOME_SECONLINE
 	clr	a
 	movc	a,@a+dptr
 	mov	dpl,a
 	lcall	_lcd_irwrite_4bits
-;	ex3-serial-lcd-4bits.c:83: initialize_serial();
+;	ex3-serial-lcd-4bits.c:84: initialize_serial();
 	lcall	_initialize_serial
-;	ex3-serial-lcd-4bits.c:85: while(1);
+;	ex3-serial-lcd-4bits.c:86: while(1);
 00102$:
-;	ex3-serial-lcd-4bits.c:86: }
+;	ex3-serial-lcd-4bits.c:87: }
 	sjmp	00102$
 	.area CSEG    (CODE)
 	.area CONST   (CODE)
@@ -514,7 +514,7 @@ _LCD_40000US_START_HIGHBITS:
 _LCD_40000US_START_LOWBITS:
 	.db #0xc9	; 201
 _DATA_BUS_PULSE_INTERVAL:
-	.byte #0x64,#0x00	;  100
+	.byte #0xa0,#0x00	; 160
 _FIRST_LINE_BUFF:
 	.ascii "MESSAGE:"
 	.db 0x00

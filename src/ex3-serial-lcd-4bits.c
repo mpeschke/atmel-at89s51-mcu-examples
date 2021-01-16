@@ -36,7 +36,8 @@ The following intervals are relevant to the HD44780 controller (in nanoseconds):
 static const unsigned char  LCD_40000US_START_HIGHBITS  = 0x7D;
 static const unsigned char  LCD_40000US_START_LOWBITS   = 0xC9;
 
-static const int            DATA_BUS_PULSE_INTERVAL     = 100;
+static const unsigned int   DATA_BUS_PULSE_INTERVAL     = 0x00A0;
+
 static const unsigned char  FIRST_LINE_BUFF[]           = {"MESSAGE:"};
 
 void ex3_ser_handler (void) __interrupt 4

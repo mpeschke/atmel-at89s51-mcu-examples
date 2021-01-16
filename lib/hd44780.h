@@ -16,7 +16,7 @@ static const unsigned char HD44780_IR_DISPLAY_CURSOR_HOME_SECONLINE = 0xC0;
 
     @param delay number of iterations (delay loop)
 */
-void lcd_set_pulse_and_busyflag_delay(const int delay);
+void lcd_set_pulse_and_busyflag_delay(const unsigned int delay);
 
 //******************************************************************************
 // 8-BIT BUS FUNCTIONS

@@ -15,17 +15,18 @@ __sbit __at 0xA0  _LCD_EN;          // P2_0
 __sbit __at 0xA1  _LCD_RW;          // P2_1
 __sbit __at 0xA2  _LCD_RS;          // P2_2
 
-static int _DELAY = 500;
+static unsigned int _DELAY = 500;
 
-void lcd_set_pulse_and_busyflag_delay(const int delay)
+void lcd_set_pulse_and_busyflag_delay(const unsigned int delay)
 { _DELAY = delay; }
 
 // Adds a 'delay' while waiting for a LCD controller response.
 // See 'LCD_set_busyflag_check_delay' and 'wait_until_not_busy' functions.
 void delay()
 {
-    int i;
-    for(i=0; i < _DELAY; i++);
+    unsigned int i = _DELAY;
+    while(i > 0)
+    { i--; }
 }
 
 // 'Pulse Enable' tells the LCD controller that there is data to be read/writen from/to the IR/DR BUS.
