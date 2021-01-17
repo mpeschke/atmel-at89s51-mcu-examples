@@ -12,11 +12,13 @@ static const unsigned char HD44780_IR_DISPLAY_CURSOR_HOME_FIRSTLINE = 0x80;
 static const unsigned char HD44780_IR_DISPLAY_CURSOR_HOME_SECONLINE = 0xC0;
 
 /**
-    Function to set the delay between BUSY_FLAG checks and EN HIGH/LOW pulses.
+    Function to set the delays for the Pulse Enable phases.
+    These will be used by the AT89S51 internal 16-bit timer.
 
-    @param delay number of iterations (delay loop)
+    @param pulse_enable_pweh_high high 8 bits - PWeh - Pulse Width High Level (see documentation, page 49 and figure 25)
+    @param pulse_enable_pweh_low low 8 bits - PWeh - Pulse Width High Level (see documentation, page 49 and figure 25)
 */
-void lcd_set_pulse_and_busyflag_delay(const unsigned int delay);
+void initialize(const unsigned char pulse_enable_pweh_high, const unsigned char pulse_enable_pweh_low);
 
 //******************************************************************************
 // 8-BIT BUS FUNCTIONS

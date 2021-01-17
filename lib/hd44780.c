@@ -1,5 +1,6 @@
 #include <at89x51.h>
 #include "hd44780.h"
+#include "mcs-51.h"
 
 __sfr __at 0x80  _LCD_IR_DR_BUS;    // P0
 
@@ -15,25 +16,20 @@ __sbit __at 0xA0  _LCD_EN;          // P2_0
 __sbit __at 0xA1  _LCD_RW;          // P2_1
 __sbit __at 0xA2  _LCD_RS;          // P2_2
 
-static unsigned int _DELAY = 500;
+static unsigned char _PULSE_ENABLE_PWEH_HIGH    = 0;
+static unsigned char _PULSE_ENABLE_PWEH_LOW     = 0;
 
-void lcd_set_pulse_and_busyflag_delay(const unsigned int delay)
-{ _DELAY = delay; }
-
-// Adds a 'delay' while waiting for a LCD controller response.
-// See 'LCD_set_busyflag_check_delay' and 'wait_until_not_busy' functions.
-void delay()
-{
-    unsigned int i = _DELAY;
-    while(i > 0)
-    { i--; }
+void initialize(const unsigned char pulse_enable_pweh_high, const unsigned char pulse_enable_pweh_low)
+{ 
+    _PULSE_ENABLE_PWEH_HIGH    = pulse_enable_pweh_high;
+    _PULSE_ENABLE_PWEH_LOW     = pulse_enable_pweh_low;
 }
 
 // 'Pulse Enable' tells the LCD controller that there is data to be read/writen from/to the IR/DR BUS.
 void pulse_enable()
 {
     _LCD_EN=1;
-    delay();
+    mcs51_timer0_delay(_PULSE_ENABLE_PWEH_HIGH, _PULSE_ENABLE_PWEH_LOW);
     _LCD_EN=0;
 }
 
@@ -75,7 +71,7 @@ void wait_until_not_busy()
     _LCD_EN=1;
 
     while (_BUSY_FLAG) {
-        delay();
+        //delay();
     };
     
     _LCD_EN=0;

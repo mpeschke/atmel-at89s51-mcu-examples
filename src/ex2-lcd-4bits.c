@@ -26,8 +26,9 @@ DELAY (in nanoseconds) = (10^9 ns * 12 * TIMER COUNTS * MULT) / (OSCILLATOR SPEE
 
 The following intervals are relevant to the HD44780 controller (in nanoseconds):
 
-40.000.000 (40 ms to initialize the module - before sending any instructions)
+40.000.000 ns = (40 ms to initialize the module - before sending any instructions)
 
+     1.000 ns = (LCD documentation says PWEH should be HIGH for at least 1000 ns. However, it requires 1,44 ms = 1200 x 1200 ns = TIMER COUNTS = 1200) 
 40.000.000 ns = (10^2 ns * 12 * TIMER COUNTS * 1) => TIMER COUNTS = 33333,3 (round to 33334)
 */
 
@@ -40,7 +41,9 @@ static const unsigned char  FIVE_SECONDS_LOWBITS        = 0xAF;
 static const unsigned char  LCD_40000US_START_HIGHBITS  = 0x7D;
 static const unsigned char  LCD_40000US_START_LOWBITS   = 0xC9;
 
-static const unsigned int   DATA_BUS_PULSE_INTERVAL     = 0x00A0;
+// TIMER COUNTS=65535-START=1200d => START=64335d=FB4Fh
+static const unsigned char  LCD_PULSE_ENABLE_PWEH_HIGH  = 0xFB;
+static const unsigned char  LCD_PULSE_ENABLE_PWEH_LOW   = 0x4F;
 
 int main()
 {
@@ -49,9 +52,8 @@ int main()
     // 40 ms to initialize the LCD controller.
     mcs51_timer0_delay(LCD_40000US_START_HIGHBITS, LCD_40000US_START_LOWBITS);
 
-    // Trial and error: 
-    // minimum value to enable the LCD to effectively read/write from/to the BUS AND check the BUSY_FLAG.
-    lcd_set_pulse_and_busyflag_delay(DATA_BUS_PULSE_INTERVAL);
+    // Initialize the LCD.
+    initialize(LCD_PULSE_ENABLE_PWEH_HIGH, LCD_PULSE_ENABLE_PWEH_LOW);
     
     // Initialization of the LCD by instructions (see HITACHI manual).
     lcd_irwrite_4bits(HD44780_IR_ENABLE_4BIT_IRDR);
