@@ -28,8 +28,9 @@ The following intervals are relevant to the HD44780 controller (in nanoseconds):
 
 40.000.000 ns = (40 ms to initialize the module - before sending any instructions)
 
-     1.000 ns = (LCD documentation says PWEH should be HIGH for at least 1000 ns. However, it requires 1,44 ms = 1200 x 1200 ns = TIMER COUNTS = 1200) 
+     1.000 ns = (LCD documentation says PWEH should be HIGH for at least 1000 ns. TIMER COUNTS = 1) 
 40.000.000 ns = (10^2 ns * 12 * TIMER COUNTS * 1) => TIMER COUNTS = 33333,3 (round to 33334)
+50.000.000 ns = (10^2 ns * 12 * TIMER COUNTS * 1) => TIMER COUNTS = 41666,67 (round to 41667)
 */
 
 // 65535-65104=431d=01AFh
@@ -41,33 +42,32 @@ static const unsigned char  FIVE_SECONDS_LOWBITS        = 0xAF;
 static const unsigned char  LCD_40000US_START_HIGHBITS  = 0x7D;
 static const unsigned char  LCD_40000US_START_LOWBITS   = 0xC9;
 
-// TIMER COUNTS=65535-START=1200d => START=64335d=FB4Fh
-static const unsigned char  LCD_PULSE_ENABLE_PWEH_HIGH  = 0xFB;
-static const unsigned char  LCD_PULSE_ENABLE_PWEH_LOW   = 0x4F;
+// TIMER COUNTS=65535-START=1d => START=64334d=FFFEh
+static const unsigned char  LCD_PULSE_ENABLE_PWEH_HIGH  = 0xFF;
+static const unsigned char  LCD_PULSE_ENABLE_PWEH_LOW   = 0xFE;
 
 int main()
 {
     unsigned char line[]={"FEDCBA9876543210"};
     
     // 40 ms to initialize the LCD controller.
-    mcs51_timer0_delay(LCD_40000US_START_HIGHBITS, LCD_40000US_START_LOWBITS);
+    //mcs51_timer0_delay(LCD_40000US_START_HIGHBITS, LCD_40000US_START_LOWBITS);
 
     // Initialize the LCD.
     initialize(LCD_PULSE_ENABLE_PWEH_HIGH, LCD_PULSE_ENABLE_PWEH_LOW);
     
     // Initialization of the LCD by instructions (see HITACHI manual).
-    lcd_irwrite_4bits(HD44780_IR_ENABLE_4BIT_IRDR);
-    lcd_irwrite_4bits(HD44780_IR_5X8_4BITS_TWO_DISPLAY_LINES);
-    lcd_irwrite_4bits(HD44780_IR_DISPLAY_ON_CURSOR_ON);
+    //lcd_irwrite_4bits(HD44780_IR_ENABLE_4BIT_IRDR);
+    //lcd_irwrite_4bits(HD44780_IR_5X8_4BITS_TWO_DISPLAY_LINES);
+    //lcd_irwrite_4bits(HD44780_IR_DISPLAY_ON_CURSOR_ON);
     
     while(1){
-        mcs51_mult_max_timer0_delay(FIVE_SECONDS_MULT, FIVE_SECONDS_HIGHBITS, FIVE_SECONDS_LOWBITS);
-
-        lcd_irwrite_4bits(HD44780_IR_DISPLAY_CLEAR);
+        clear();
         lcd_irwrite_4bits(HD44780_IR_DISPLAY_CURSOR_HOME_FIRSTLINE);
         lcd_stringwrite_4bits(line);
 
         lcd_irwrite_4bits(HD44780_IR_DISPLAY_CURSOR_HOME_SECONLINE);
         lcd_stringwrite_4bits(line);
+        mcs51_mult_max_timer0_delay(FIVE_SECONDS_MULT, FIVE_SECONDS_HIGHBITS, FIVE_SECONDS_LOWBITS);
     }
 }

@@ -10,10 +10,10 @@
 ;--------------------------------------------------------
 	.globl _main
 	.globl _mcs51_mult_max_timer0_delay
-	.globl _mcs51_timer0_delay
 	.globl _lcd_stringwrite_4bits
 	.globl _lcd_irwrite_4bits
-	.globl _lcd_set_pulse_and_busyflag_delay
+	.globl _clear
+	.globl _initialize
 ;--------------------------------------------------------
 ; special function registers
 ;--------------------------------------------------------
@@ -122,7 +122,7 @@ __sdcc_program_startup:
 ;------------------------------------------------------------
 ;line                      Allocated with name '_main_line_65536_11'
 ;------------------------------------------------------------
-;	ex2-lcd-4bits.c:45: int main()
+;	ex2-lcd-4bits.c:49: int main()
 ;	-----------------------------------------
 ;	 function main
 ;	-----------------------------------------
@@ -135,7 +135,7 @@ _main:
 	ar2 = 0x02
 	ar1 = 0x01
 	ar0 = 0x00
-;	ex2-lcd-4bits.c:47: unsigned char line[]={"FEDCBA9876543210"};
+;	ex2-lcd-4bits.c:51: unsigned char line[]={"FEDCBA9876543210"};
 	mov	_main_line_65536_11,#0x46
 	mov	(_main_line_65536_11 + 0x0001),#0x45
 	mov	(_main_line_65536_11 + 0x0002),#0x44
@@ -153,49 +153,42 @@ _main:
 	mov	(_main_line_65536_11 + 0x000e),#0x31
 	mov	(_main_line_65536_11 + 0x000f),#0x30
 	mov	(_main_line_65536_11 + 0x0010),#0x00
-;	ex2-lcd-4bits.c:50: mcs51_timer0_delay(LCD_40000US_START_HIGHBITS, LCD_40000US_START_LOWBITS);
-	mov	dptr,#_LCD_40000US_START_HIGHBITS
+;	ex2-lcd-4bits.c:57: initialize(LCD_PULSE_ENABLE_PWEH_HIGH, LCD_PULSE_ENABLE_PWEH_LOW);
+	mov	dptr,#_LCD_PULSE_ENABLE_PWEH_HIGH
 	clr	a
 	movc	a,@a+dptr
 	mov	r7,a
-	mov	dptr,#_LCD_40000US_START_LOWBITS
+	mov	dptr,#_LCD_PULSE_ENABLE_PWEH_LOW
 	clr	a
 	movc	a,@a+dptr
-	mov	_mcs51_timer0_delay_PARM_2,a
+	mov	_initialize_PARM_2,a
 	mov	dpl,r7
-	lcall	_mcs51_timer0_delay
-;	ex2-lcd-4bits.c:54: lcd_set_pulse_and_busyflag_delay(DATA_BUS_PULSE_INTERVAL);
-	mov	dptr,#_DATA_BUS_PULSE_INTERVAL
-	clr	a
-	movc	a,@a+dptr
-	mov	r6,a
-	mov	a,#0x01
-	movc	a,@a+dptr
-	mov	r7,a
-	mov	dpl,r6
-	mov	dph,r7
-	lcall	_lcd_set_pulse_and_busyflag_delay
-;	ex2-lcd-4bits.c:57: lcd_irwrite_4bits(HD44780_IR_ENABLE_4BIT_IRDR);
-	mov	dptr,#_HD44780_IR_ENABLE_4BIT_IRDR
-	clr	a
-	movc	a,@a+dptr
-	mov	dpl,a
-	lcall	_lcd_irwrite_4bits
-;	ex2-lcd-4bits.c:58: lcd_irwrite_4bits(HD44780_IR_5X8_4BITS_TWO_DISPLAY_LINES);
-	mov	dptr,#_HD44780_IR_5X8_4BITS_TWO_DISPLAY_LINES
-	clr	a
-	movc	a,@a+dptr
-	mov	dpl,a
-	lcall	_lcd_irwrite_4bits
-;	ex2-lcd-4bits.c:59: lcd_irwrite_4bits(HD44780_IR_DISPLAY_ON_CURSOR_ON);
-	mov	dptr,#_HD44780_IR_DISPLAY_ON_CURSOR_ON
-	clr	a
-	movc	a,@a+dptr
-	mov	dpl,a
-	lcall	_lcd_irwrite_4bits
-;	ex2-lcd-4bits.c:61: while(1){
+	lcall	_initialize
+;	ex2-lcd-4bits.c:64: while(1){
 00102$:
-;	ex2-lcd-4bits.c:62: mcs51_mult_max_timer0_delay(FIVE_SECONDS_MULT, FIVE_SECONDS_HIGHBITS, FIVE_SECONDS_LOWBITS);
+;	ex2-lcd-4bits.c:65: clear();
+	lcall	_clear
+;	ex2-lcd-4bits.c:66: lcd_irwrite_4bits(HD44780_IR_DISPLAY_CURSOR_HOME_FIRSTLINE);
+	mov	dptr,#_HD44780_IR_DISPLAY_CURSOR_HOME_FIRSTLINE
+	clr	a
+	movc	a,@a+dptr
+	mov	dpl,a
+	lcall	_lcd_irwrite_4bits
+;	ex2-lcd-4bits.c:67: lcd_stringwrite_4bits(line);
+	mov	dptr,#_main_line_65536_11
+	mov	b,#0x40
+	lcall	_lcd_stringwrite_4bits
+;	ex2-lcd-4bits.c:69: lcd_irwrite_4bits(HD44780_IR_DISPLAY_CURSOR_HOME_SECONLINE);
+	mov	dptr,#_HD44780_IR_DISPLAY_CURSOR_HOME_SECONLINE
+	clr	a
+	movc	a,@a+dptr
+	mov	dpl,a
+	lcall	_lcd_irwrite_4bits
+;	ex2-lcd-4bits.c:70: lcd_stringwrite_4bits(line);
+	mov	dptr,#_main_line_65536_11
+	mov	b,#0x40
+	lcall	_lcd_stringwrite_4bits
+;	ex2-lcd-4bits.c:71: mcs51_mult_max_timer0_delay(FIVE_SECONDS_MULT, FIVE_SECONDS_HIGHBITS, FIVE_SECONDS_LOWBITS);
 	mov	dptr,#_FIVE_SECONDS_MULT
 	clr	a
 	movc	a,@a+dptr
@@ -214,33 +207,7 @@ _main:
 	mov	dpl,r6
 	mov	dph,r7
 	lcall	_mcs51_mult_max_timer0_delay
-;	ex2-lcd-4bits.c:64: lcd_irwrite_4bits(HD44780_IR_DISPLAY_CLEAR);
-	mov	dptr,#_HD44780_IR_DISPLAY_CLEAR
-	clr	a
-	movc	a,@a+dptr
-	mov	dpl,a
-	lcall	_lcd_irwrite_4bits
-;	ex2-lcd-4bits.c:65: lcd_irwrite_4bits(HD44780_IR_DISPLAY_CURSOR_HOME_FIRSTLINE);
-	mov	dptr,#_HD44780_IR_DISPLAY_CURSOR_HOME_FIRSTLINE
-	clr	a
-	movc	a,@a+dptr
-	mov	dpl,a
-	lcall	_lcd_irwrite_4bits
-;	ex2-lcd-4bits.c:66: lcd_stringwrite_4bits(line);
-	mov	dptr,#_main_line_65536_11
-	mov	b,#0x40
-	lcall	_lcd_stringwrite_4bits
-;	ex2-lcd-4bits.c:68: lcd_irwrite_4bits(HD44780_IR_DISPLAY_CURSOR_HOME_SECONLINE);
-	mov	dptr,#_HD44780_IR_DISPLAY_CURSOR_HOME_SECONLINE
-	clr	a
-	movc	a,@a+dptr
-	mov	dpl,a
-	lcall	_lcd_irwrite_4bits
-;	ex2-lcd-4bits.c:69: lcd_stringwrite_4bits(line);
-	mov	dptr,#_main_line_65536_11
-	mov	b,#0x40
-	lcall	_lcd_stringwrite_4bits
-;	ex2-lcd-4bits.c:71: }
+;	ex2-lcd-4bits.c:73: }
 	sjmp	00102$
 	.area CSEG    (CODE)
 	.area CONST   (CODE)
@@ -268,7 +235,9 @@ _LCD_40000US_START_HIGHBITS:
 	.db #0x7d	; 125
 _LCD_40000US_START_LOWBITS:
 	.db #0xc9	; 201
-_DATA_BUS_PULSE_INTERVAL:
-	.byte #0xa0,#0x00	; 160
+_LCD_PULSE_ENABLE_PWEH_HIGH:
+	.db #0xff	; 255
+_LCD_PULSE_ENABLE_PWEH_LOW:
+	.db #0xfe	; 254
 	.area XINIT   (CODE)
 	.area CABS    (ABS,CODE)

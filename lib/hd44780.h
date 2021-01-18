@@ -20,6 +20,8 @@ static const unsigned char HD44780_IR_DISPLAY_CURSOR_HOME_SECONLINE = 0xC0;
 */
 void initialize(const unsigned char pulse_enable_pweh_high, const unsigned char pulse_enable_pweh_low);
 
+void clear();
+
 //******************************************************************************
 // 8-BIT BUS FUNCTIONS
 
