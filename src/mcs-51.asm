@@ -107,12 +107,12 @@
 	.globl _DPL
 	.globl _SP
 	.globl _P0
-	.globl _mcs51_mult_max_timer1_delay_PARM_3
 	.globl _mcs51_mult_max_timer1_delay_PARM_2
-	.globl _mcs51_mult_max_timer0_delay_PARM_3
 	.globl _mcs51_mult_max_timer0_delay_PARM_2
 	.globl _mcs51_timer0_delay
+	.globl _mcs51_timer0_delay_16bit
 	.globl _mcs51_mult_max_timer0_delay
+	.globl _mcs51_timer1_delay_16bit
 	.globl _mcs51_timer1_delay
 	.globl _mcs51_mult_max_timer1_delay
 ;--------------------------------------------------------
@@ -232,13 +232,9 @@ _CY	=	0x00d7
 ;--------------------------------------------------------
 	.area DSEG    (DATA)
 _mcs51_mult_max_timer0_delay_PARM_2:
-	.ds 1
-_mcs51_mult_max_timer0_delay_PARM_3:
-	.ds 1
+	.ds 2
 _mcs51_mult_max_timer1_delay_PARM_2:
-	.ds 1
-_mcs51_mult_max_timer1_delay_PARM_3:
-	.ds 1
+	.ds 2
 ;--------------------------------------------------------
 ; overlayable items in internal ram 
 ;--------------------------------------------------------
@@ -309,7 +305,7 @@ _mcs51_timer1_delay_PARM_2:
 ;tl0                       Allocated with name '_mcs51_timer0_delay_PARM_2'
 ;th0                       Allocated to registers r7 
 ;------------------------------------------------------------
-;	../lib/mcs-51.c:4: void mcs51_timer0_delay(const unsigned char th0, const unsigned char tl0)
+;	../lib/mcs-51.c:6: void mcs51_timer0_delay(const unsigned char th0, const unsigned char tl0)
 ;	-----------------------------------------
 ;	 function mcs51_timer0_delay
 ;	-----------------------------------------
@@ -323,133 +319,203 @@ _mcs51_timer0_delay:
 	ar1 = 0x01
 	ar0 = 0x00
 	mov	r7,dpl
-;	../lib/mcs-51.c:6: TMOD = M0_0;  // Timer 0 is in use. 16-bit Timer Mode is selected.  
+;	../lib/mcs-51.c:8: TMOD = M0_0;  // Timer 0 is in use. 16-bit Timer Mode is selected.  
 	mov	_TMOD,#0x01
-;	../lib/mcs-51.c:7: TL0 = tl0;    // Load value for TL0 register
+;	../lib/mcs-51.c:9: TL0 = tl0;    // Load value for TL0 register
 	mov	_TL0,_mcs51_timer0_delay_PARM_2
-;	../lib/mcs-51.c:8: TH0 = th0;    // Load value for TH0 register
+;	../lib/mcs-51.c:10: TH0 = th0;    // Load value for TH0 register
 	mov	_TH0,r7
-;	../lib/mcs-51.c:9: TR0 = 1;      // Run Timer-0
+;	../lib/mcs-51.c:11: TR0 = 1;      // Run Timer-0
 ;	assignBit
 	setb	_TR0
-;	../lib/mcs-51.c:11: while(!TF0);  // Poll TF0  
+;	../lib/mcs-51.c:13: while(!TF0);  // Poll TF0  
 00101$:
 	jnb	_TF0,00101$
-;	../lib/mcs-51.c:13: TR0 = 0;      // If TF0=1 stop the timer by making TR0=0
+;	../lib/mcs-51.c:15: TR0 = 0;      // If TF0=1 stop the timer by making TR0=0
 ;	assignBit
 	clr	_TR0
-;	../lib/mcs-51.c:14: TF0 = 0;      // If TF0=1 stop the timer by making TR0=0
+;	../lib/mcs-51.c:16: TF0 = 0;      // If TF0=1 stop the timer by making TR0=0
 ;	assignBit
 	clr	_TF0
-;	../lib/mcs-51.c:15: }
+;	../lib/mcs-51.c:17: }
 	ret
+;------------------------------------------------------------
+;Allocation info for local variables in function 'mcs51_timer0_delay_16bit'
+;------------------------------------------------------------
+;thtl0                     Allocated to registers r6 r7 
+;------------------------------------------------------------
+;	../lib/mcs-51.c:19: void mcs51_timer0_delay_16bit(const unsigned int thtl0)
+;	-----------------------------------------
+;	 function mcs51_timer0_delay_16bit
+;	-----------------------------------------
+_mcs51_timer0_delay_16bit:
+	mov	r6,dpl
+	mov	r7,dph
+;	../lib/mcs-51.c:20: { mcs51_timer0_delay((thtl0 >> 8) & _LOWER_BITS_MASK, thtl0 & _LOWER_BITS_MASK); }
+	mov	ar5,r7
+	mov	dptr,#__LOWER_BITS_MASK
+	clr	a
+	movc	a,@a+dptr
+	mov	r4,a
+	anl	a,r5
+	mov	dpl,a
+	mov	a,r4
+	anl	a,r6
+	mov	_mcs51_timer0_delay_PARM_2,a
+	ljmp	_mcs51_timer0_delay
 ;------------------------------------------------------------
 ;Allocation info for local variables in function 'mcs51_mult_max_timer0_delay'
 ;------------------------------------------------------------
-;th0                       Allocated with name '_mcs51_mult_max_timer0_delay_PARM_2'
-;tl0                       Allocated with name '_mcs51_mult_max_timer0_delay_PARM_3'
+;thtl0                     Allocated with name '_mcs51_mult_max_timer0_delay_PARM_2'
 ;mult                      Allocated to registers 
 ;cpmult                    Allocated to registers r6 r7 
 ;------------------------------------------------------------
-;	../lib/mcs-51.c:17: void mcs51_mult_max_timer0_delay(const unsigned int mult, const unsigned char th0, const unsigned char tl0)
+;	../lib/mcs-51.c:22: void mcs51_mult_max_timer0_delay(const unsigned int mult, const unsigned int thtl0)
 ;	-----------------------------------------
 ;	 function mcs51_mult_max_timer0_delay
 ;	-----------------------------------------
 _mcs51_mult_max_timer0_delay:
 	mov	r6,dpl
 	mov	r7,dph
-;	../lib/mcs-51.c:20: while(cpmult > 0)
+;	../lib/mcs-51.c:25: while(cpmult > 0)
+	mov	r5,(_mcs51_mult_max_timer0_delay_PARM_2 + 1)
 00101$:
 	mov	a,r6
 	orl	a,r7
 	jz	00104$
-;	../lib/mcs-51.c:22: mcs51_timer0_delay(th0, tl0);
-	mov	_mcs51_timer0_delay_PARM_2,_mcs51_mult_max_timer0_delay_PARM_3
-	mov	dpl,_mcs51_mult_max_timer0_delay_PARM_2
+;	../lib/mcs-51.c:27: mcs51_timer0_delay((thtl0 >> 8) & _LOWER_BITS_MASK, thtl0 & _LOWER_BITS_MASK);
+	mov	dptr,#__LOWER_BITS_MASK
+	clr	a
+	movc	a,@a+dptr
+	mov	r4,a
+	anl	a,r5
+	mov	dpl,a
+	mov	r3,_mcs51_mult_max_timer0_delay_PARM_2
+	mov	a,r4
+	anl	a,r3
+	mov	_mcs51_timer0_delay_PARM_2,a
 	push	ar7
 	push	ar6
+	push	ar5
 	lcall	_mcs51_timer0_delay
+	pop	ar5
 	pop	ar6
 	pop	ar7
-;	../lib/mcs-51.c:23: cpmult--;
+;	../lib/mcs-51.c:28: cpmult--;
 	dec	r6
 	cjne	r6,#0xff,00116$
 	dec	r7
 00116$:
 	sjmp	00101$
 00104$:
-;	../lib/mcs-51.c:25: }
+;	../lib/mcs-51.c:30: }
 	ret
+;------------------------------------------------------------
+;Allocation info for local variables in function 'mcs51_timer1_delay_16bit'
+;------------------------------------------------------------
+;thtl1                     Allocated to registers r6 r7 
+;------------------------------------------------------------
+;	../lib/mcs-51.c:32: void mcs51_timer1_delay_16bit(const unsigned int thtl1)
+;	-----------------------------------------
+;	 function mcs51_timer1_delay_16bit
+;	-----------------------------------------
+_mcs51_timer1_delay_16bit:
+	mov	r6,dpl
+	mov	r7,dph
+;	../lib/mcs-51.c:33: { mcs51_timer1_delay((thtl1 >> 8) & _LOWER_BITS_MASK, thtl1 & _LOWER_BITS_MASK); }
+	mov	ar5,r7
+	mov	dptr,#__LOWER_BITS_MASK
+	clr	a
+	movc	a,@a+dptr
+	mov	r4,a
+	anl	a,r5
+	mov	dpl,a
+	mov	a,r4
+	anl	a,r6
+	mov	_mcs51_timer1_delay_PARM_2,a
+	ljmp	_mcs51_timer1_delay
 ;------------------------------------------------------------
 ;Allocation info for local variables in function 'mcs51_timer1_delay'
 ;------------------------------------------------------------
 ;tl1                       Allocated with name '_mcs51_timer1_delay_PARM_2'
 ;th1                       Allocated to registers r7 
 ;------------------------------------------------------------
-;	../lib/mcs-51.c:27: void mcs51_timer1_delay(const unsigned char th1, const unsigned char tl1)
+;	../lib/mcs-51.c:35: void mcs51_timer1_delay(const unsigned char th1, const unsigned char tl1)
 ;	-----------------------------------------
 ;	 function mcs51_timer1_delay
 ;	-----------------------------------------
 _mcs51_timer1_delay:
 	mov	r7,dpl
-;	../lib/mcs-51.c:29: TMOD = M1_0;  // Timer 1 is in use. 16-bit Timer Mode is selected.  
+;	../lib/mcs-51.c:37: TMOD = M1_0;  // Timer 1 is in use. 16-bit Timer Mode is selected.  
 	mov	_TMOD,#0x02
-;	../lib/mcs-51.c:30: TL1 = tl1;    // Load value for TL1 register
+;	../lib/mcs-51.c:38: TL1 = tl1;    // Load value for TL1 register
 	mov	_TL1,_mcs51_timer1_delay_PARM_2
-;	../lib/mcs-51.c:31: TH1 = th1;    // Load value for TH1 register
+;	../lib/mcs-51.c:39: TH1 = th1;    // Load value for TH1 register
 	mov	_TH1,r7
-;	../lib/mcs-51.c:32: TR1 = 1;      // Run Timer-1
+;	../lib/mcs-51.c:40: TR1 = 1;      // Run Timer-1
 ;	assignBit
 	setb	_TR1
-;	../lib/mcs-51.c:34: while(!TF1);  // Poll TF1  
+;	../lib/mcs-51.c:42: while(!TF1);  // Poll TF1  
 00101$:
 	jnb	_TF1,00101$
-;	../lib/mcs-51.c:36: TR1 = 0;      // If TF1=1 stop the timer by making TR1=0
+;	../lib/mcs-51.c:44: TR1 = 0;      // If TF1=1 stop the timer by making TR1=0
 ;	assignBit
 	clr	_TR1
-;	../lib/mcs-51.c:37: TF1 = 0;      // If TF1=1 stop the timer by making TR1=0
+;	../lib/mcs-51.c:45: TF1 = 0;      // If TF1=1 stop the timer by making TR1=0
 ;	assignBit
 	clr	_TF1
-;	../lib/mcs-51.c:38: }
+;	../lib/mcs-51.c:46: }
 	ret
 ;------------------------------------------------------------
 ;Allocation info for local variables in function 'mcs51_mult_max_timer1_delay'
 ;------------------------------------------------------------
-;th1                       Allocated with name '_mcs51_mult_max_timer1_delay_PARM_2'
-;tl1                       Allocated with name '_mcs51_mult_max_timer1_delay_PARM_3'
+;thtl1                     Allocated with name '_mcs51_mult_max_timer1_delay_PARM_2'
 ;mult                      Allocated to registers 
 ;cpmult                    Allocated to registers r6 r7 
 ;------------------------------------------------------------
-;	../lib/mcs-51.c:40: void mcs51_mult_max_timer1_delay(const unsigned int mult, const unsigned char th1, const unsigned char tl1)
+;	../lib/mcs-51.c:48: void mcs51_mult_max_timer1_delay(const unsigned int mult, const unsigned int thtl1)
 ;	-----------------------------------------
 ;	 function mcs51_mult_max_timer1_delay
 ;	-----------------------------------------
 _mcs51_mult_max_timer1_delay:
 	mov	r6,dpl
 	mov	r7,dph
-;	../lib/mcs-51.c:43: while(cpmult > 0)
+;	../lib/mcs-51.c:51: while(cpmult > 0)
+	mov	r5,(_mcs51_mult_max_timer1_delay_PARM_2 + 1)
 00101$:
 	mov	a,r6
 	orl	a,r7
 	jz	00104$
-;	../lib/mcs-51.c:45: mcs51_timer1_delay(th1, tl1);
-	mov	_mcs51_timer1_delay_PARM_2,_mcs51_mult_max_timer1_delay_PARM_3
-	mov	dpl,_mcs51_mult_max_timer1_delay_PARM_2
+;	../lib/mcs-51.c:53: mcs51_timer1_delay((thtl1 >> 8) & _LOWER_BITS_MASK, thtl1 & _LOWER_BITS_MASK);
+	mov	dptr,#__LOWER_BITS_MASK
+	clr	a
+	movc	a,@a+dptr
+	mov	r4,a
+	anl	a,r5
+	mov	dpl,a
+	mov	r3,_mcs51_mult_max_timer1_delay_PARM_2
+	mov	a,r4
+	anl	a,r3
+	mov	_mcs51_timer1_delay_PARM_2,a
 	push	ar7
 	push	ar6
+	push	ar5
 	lcall	_mcs51_timer1_delay
+	pop	ar5
 	pop	ar6
 	pop	ar7
-;	../lib/mcs-51.c:46: cpmult--;
+;	../lib/mcs-51.c:54: cpmult--;
 	dec	r6
 	cjne	r6,#0xff,00116$
 	dec	r7
 00116$:
 	sjmp	00101$
 00104$:
-;	../lib/mcs-51.c:48: }
+;	../lib/mcs-51.c:56: }
 	ret
 	.area CSEG    (CODE)
 	.area CONST   (CODE)
+__LOWER_BITS_MASK:
+	.db #0xff	; 255
 	.area XINIT   (CODE)
 	.area CABS    (ABS,CODE)

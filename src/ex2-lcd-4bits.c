@@ -7,7 +7,7 @@ For a 10MHz crystal oscillator, the two AT89S51 internal timers will have a freq
 10.000.000 Hz / 12 ~= 833.333 Hz ~= 833,33 KHz
 Source: Ayala, Kenneth J., The 8051 Microcontroller, 3rd Edition, page 30.
 
-So, the timer resolution for a 10 MHz crystal oscillator is:
+So, the timer resolution (or period) for a 10 MHz crystal oscillator is:
 
 (10^9 ns * 12 / 10^7 Hz) = 1200 ns (nanoseconds) = 1,2 us (microseconds)
 
@@ -21,53 +21,57 @@ we can program delays according to the formula:
 
 DELAY (in nanoseconds) = (10^9 ns * 12 * TIMER COUNTS * MULT) / (OSCILLATOR SPEED)
 
-2s = 2000000000 ns ~= 1,9999824s = (10^9 ns * 12 * 64102 * 26) / 10x10^6
 5s = 5000000000 ns ~= 4,9999872s = (10^9 ns * 12 * 65104 * 64) / 10x10^6
 
-The following intervals are relevant to the HD44780 controller (in nanoseconds):
+The following delays are relevant to the HD44780 controller (see hd44780.h):
 
-40.000.000 ns = (40 ms to initialize the module - before sending any instructions)
-
-     1.000 ns = (LCD documentation says PWEH should be HIGH for at least 1000 ns. TIMER COUNTS = 1) 
-40.000.000 ns = (10^2 ns * 12 * TIMER COUNTS * 1) => TIMER COUNTS = 33333,3 (round to 33334)
+     1.000 ns = (10^2 ns * 12 * TIMER COUNTS * 1) => TIMER COUNTS = 0,83 (round to 1) 
+   100.000 ns = (10^2 ns * 12 * TIMER COUNTS * 1) => TIMER COUNTS = 83,333333333 (round to 84) 
+   150.000 ns = (10^2 ns * 12 * TIMER COUNTS * 1) => TIMER COUNTS = 125
+ 2.000.000 ns = (10^2 ns * 12 * TIMER COUNTS * 1) => TIMER COUNTS = 1666,666666667 (round to 1667) 
+ 4.500.000 ns = (10^2 ns * 12 * TIMER COUNTS * 1) => TIMER COUNTS = 3750
 50.000.000 ns = (10^2 ns * 12 * TIMER COUNTS * 1) => TIMER COUNTS = 41666,67 (round to 41667)
 */
 
 // 65535-65104=431d=01AFh
 static const unsigned int   FIVE_SECONDS_MULT           = 64;
-static const unsigned char  FIVE_SECONDS_HIGHBITS       = 0x01;
-static const unsigned char  FIVE_SECONDS_LOWBITS        = 0xAF;
-
-// TIMER COUNTS=65535-START=33334d => START=32201d=7DC9h
-static const unsigned char  LCD_40000US_START_HIGHBITS  = 0x7D;
-static const unsigned char  LCD_40000US_START_LOWBITS   = 0xC9;
+static const unsigned int   FIVE_SECONDS_COUNTER        = 0x01AF;
 
 // TIMER COUNTS=65535-START=1d => START=64334d=FFFEh
-static const unsigned char  LCD_PULSE_ENABLE_PWEH_HIGH  = 0xFF;
-static const unsigned char  LCD_PULSE_ENABLE_PWEH_LOW   = 0xFE;
+static const unsigned int  LCD_DLAY_PE_PWEH             = 0xFFFE;
+// TIMER COUNTS=65535-START=84d => START=65451d=FFABh
+static const unsigned int  LCD_DLAY_PE_TAH              = 0xFFAB;
+// TIMER COUNTS=65535-START=125d => START=65410d=FF82h
+static const unsigned int  LCD_DLAY_INIT_3RD            = 0xFF82;
+// TIMER COUNTS=65535-START=1667d => START=63868d=F97Ch
+static const unsigned int  LCD_DLAY_CLEAR_DISPLAY_HOME  = 0xF97C;
+// TIMER COUNTS=65535-START=3750d => START=61785d=F159h
+static const unsigned int  LCD_DLAY_INIT_1ST_2ND        = 0xF159;
+// TIMER COUNTS=65535-START=41667d => START=23868d=5D3Ch
+static const unsigned int  LCD_DLAY_INIT                = 0x5D3C;
 
 int main()
 {
     unsigned char line[]={"FEDCBA9876543210"};
     
-    // 40 ms to initialize the LCD controller.
-    //mcs51_timer0_delay(LCD_40000US_START_HIGHBITS, LCD_40000US_START_LOWBITS);
-
     // Initialize the LCD.
-    initialize(LCD_PULSE_ENABLE_PWEH_HIGH, LCD_PULSE_ENABLE_PWEH_LOW);
-    
-    // Initialization of the LCD by instructions (see HITACHI manual).
-    //lcd_irwrite_4bits(HD44780_IR_ENABLE_4BIT_IRDR);
-    //lcd_irwrite_4bits(HD44780_IR_5X8_4BITS_TWO_DISPLAY_LINES);
-    //lcd_irwrite_4bits(HD44780_IR_DISPLAY_ON_CURSOR_ON);
+    lcd_initialize(
+        LCD_FUNCSET_4BITMODE | LCD_FUNCSET_2LINE | LCD_FUNCSET_5x8DOTS,
+        LCD_DLAY_PE_PWEH,
+        LCD_DLAY_PE_TAH,
+        LCD_DLAY_INIT_3RD,
+        LCD_DLAY_CLEAR_DISPLAY_HOME,
+        LCD_DLAY_INIT_1ST_2ND,
+        LCD_DLAY_INIT
+    );
     
     while(1){
-        clear();
-        lcd_irwrite_4bits(HD44780_IR_DISPLAY_CURSOR_HOME_FIRSTLINE);
-        lcd_stringwrite_4bits(line);
+        lcd_clear();
+        lcd_instruction_register(LCD_SETDDRAMADDR_R0_C0);
+        lcd_print(line);
 
-        lcd_irwrite_4bits(HD44780_IR_DISPLAY_CURSOR_HOME_SECONLINE);
-        lcd_stringwrite_4bits(line);
-        mcs51_mult_max_timer0_delay(FIVE_SECONDS_MULT, FIVE_SECONDS_HIGHBITS, FIVE_SECONDS_LOWBITS);
+        lcd_instruction_register(LCD_SETDDRAMADDR_R1_C0);
+        lcd_print(line);
+        mcs51_mult_max_timer0_delay(FIVE_SECONDS_MULT, FIVE_SECONDS_COUNTER);
     }
 }
