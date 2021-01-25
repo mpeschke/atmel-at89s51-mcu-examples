@@ -8,7 +8,7 @@ You need sdcc compiler in order to build the libraries and examples in this repo
 
 >*\# apt install -y sdcc sdcc-ucsim*  
 
-Optional components (sdcc documentation, avrdude to flash the firmware, and the MCU 8051 IDE for the sdcc compiler):  
+Optional components (sdcc documentation, avrdude to flash the firmware, and the MCU 8051 IDE for a sdcc IDE):  
 
 >*\# apt install -y sdcc-doc avrdude mcu8051ide*  
 
@@ -28,7 +28,7 @@ The -P parameter must be the USB port where your ISP programmer is connected to:
 
 >*$ avrdude -C ../conf/AT89S5x.conf -c stk500v1 -P /dev/ttyUSB0 -p 89s51 -b 19200 -U flash:w:ex1-lcd-8bits.hex*  
 
-To setup an Arduino Uno as an AVRISP programmer, check this video: https://www.youtube.com/watch?v=Pdi-q-bamlI  
+To setup an Arduino Uno (or compatible) as an AVRISP programmer, check this video: https://www.youtube.com/watch?v=Pdi-q-bamlI  
 
 # Example 1 - Interfacing the MCU with a HITACHI HD44780 LCD Controller Module (8-bit Data Registers)
 

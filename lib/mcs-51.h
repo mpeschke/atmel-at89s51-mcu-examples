@@ -1,10 +1,12 @@
 #ifndef __MCS_51_H
 #define __MCS_51_H
 
-/**
-    Wrapper for the mcs51_timer0_delay function: parameter is the 16-bit counter start value.
+// Library to share common AT89S51 functions with all project examples.
 
-    @param thtl0  the HIGHER bits of the 16-bit counter start value.
+/**
+    Wrapper for the mcs51_timer0_delay function.
+
+    @param thtl0  the 16-bit counter start value.
 */
 void mcs51_timer0_delay_16bit(const unsigned int thtl0);
 
@@ -17,9 +19,9 @@ void mcs51_timer0_delay_16bit(const unsigned int thtl0);
 void mcs51_timer0_delay(const unsigned char th0, const unsigned char tl0);
 
 /**
-    Wrapper for the mcs51_timer1_delay function: parameter is the 16-bit counter start value.
+    Wrapper for the mcs51_timer1_delay function.
 
-    @param thtl1  the HIGHER bits of the 16-bit counter start value.
+    @param thtl1  the 16-bit counter start value.
 */
 void mcs51_timer1_delay_16bit(const unsigned int thtl1);
 
