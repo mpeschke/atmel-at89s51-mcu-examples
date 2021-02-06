@@ -7,7 +7,7 @@ For a 10MHz crystal oscillator, the two AT89S51 internal timers will have a freq
 10.000.000 Hz / 12 ~= 833.333 Hz ~= 833,33 KHz
 Source: Ayala, Kenneth J., The 8051 Microcontroller, 3rd Edition, page 30.
 
-So, the timer resolution for a 10 MHz crystal oscillator is:
+So, the timer resolution (or period) for a 10 MHz crystal oscillator is:
 
 (10^9 ns * 12 / 10^7 Hz) = 1200 ns (nanoseconds) = 1,2 us (microseconds)
 
@@ -17,63 +17,73 @@ So, for a 10 MHz crystal oscillator, the timer's maximum delay is:
 (10^2 * 12 * 65535) =  78642000 ns = 78642 us = 78,642 ms ~= 0,078642 s
 
 Using the 'mcs51_mult_max_timer0_delay' function, that can run the timer 'mult' times,
-we can program delays according to the formula:
+we can program extended delays, according to the formula:
 
 DELAY (in nanoseconds) = (10^9 ns * 12 * TIMER COUNTS * MULT) / (OSCILLATOR SPEED)
 
 2s = 2000000000 ns ~= 1,9999824s = (10^9 ns * 12 * 64102 * 26) / 10x10^6
 5s = 5000000000 ns ~= 4,9999872s = (10^9 ns * 12 * 65104 * 64) / 10x10^6
 
-The following intervals are relevant to the HD44780 controller (in nanoseconds):
+The following delays are relevant to the HD44780 controller (see hd44780.h):
 
-40.000.000 (40 ms to initialize the module - before sending any instructions)
-
-40.000.000 ns = (10^2 ns * 12 * TIMER COUNTS * 1) => TIMER COUNTS = 33333,3 (round to 33334)
+     1.000 ns = (10^2 ns * 12 * TIMER COUNTS * 1) => TIMER COUNTS = 0,83 (round to 1) 
+   100.000 ns = (10^2 ns * 12 * TIMER COUNTS * 1) => TIMER COUNTS = 83,333333333 (round to 84) 
+   150.000 ns = (10^2 ns * 12 * TIMER COUNTS * 1) => TIMER COUNTS = 125
+ 2.000.000 ns = (10^2 ns * 12 * TIMER COUNTS * 1) => TIMER COUNTS = 1666,666666667 (round to 1667) 
+ 4.500.000 ns = (10^2 ns * 12 * TIMER COUNTS * 1) => TIMER COUNTS = 3750
+50.000.000 ns = (10^2 ns * 12 * TIMER COUNTS * 1) => TIMER COUNTS = 41666,67 (round to 41667)
 */
 
-// 65535-64102=1433d=0599h
-static const int            TWO_SECONDS_MULT            = 26;
-static const unsigned char  TWO_SECONDS_HIGHBITS        = 0x05;
-static const unsigned char  TWO_SECONDS_LOWBITS         = 0x99;
+// TIMER COUNTS=65535-64102=1433d=0599h
+static const unsigned int  TWO_SECONDS_MULT             = 26;
+static const unsigned int  TWO_SECONDS_COUNTER          = 0x0599;
 
-// 65535-65104=431d=01AFh
-static const int            FIVE_SECONDS_MULT           = 64;
-static const unsigned char  FIVE_SECONDS_HIGHBITS       = 0x01;
-static const unsigned char  FIVE_SECONDS_LOWBITS        = 0xAF;
+// TIMER COUNTS=65535-65104=431d => START=431d=01AFh x 64
+static const unsigned int  FIVE_SECONDS_MULT            = 64;
+static const unsigned int  FIVE_SECONDS_COUNTER         = 0x01AF;
 
-// TIMER COUNTS=65535-START=33334d => START=32201d=7DC9h
-static const unsigned char  LCD_40000US_START_HIGHBITS  = 0x7D;
-static const unsigned char  LCD_40000US_START_LOWBITS   = 0xC9;
-
-static const unsigned int   DATA_BUS_PULSE_INTERVAL     = 0x00A0;
+// TIMER COUNTS=65535-START=1d => START=64334d=FFFEh
+static const unsigned int  LCD_DLAY_PE_PWEH             = 0xFFFE;
+// TIMER COUNTS=65535-START=84d => START=65451d=FFABh
+static const unsigned int  LCD_DLAY_PE_TAH              = 0xFFAB;
+// TIMER COUNTS=65535-START=125d => START=65410d=FF82h
+static const unsigned int  LCD_DLAY_INIT_3RD            = 0xFF82;
+// TIMER COUNTS=65535-START=1667d => START=63868d=F97Ch
+static const unsigned int  LCD_DLAY_CLEAR_DISPLAY_HOME  = 0xF97C;
+// TIMER COUNTS=65535-START=3750d => START=61785d=F159h
+static const unsigned int  LCD_DLAY_INIT_1ST_2ND        = 0xF159;
+// TIMER COUNTS=65535-START=41667d => START=23868d=5D3Ch
+static const unsigned int  LCD_DLAY_INIT                = 0x5D3C;
 
 int main()
 {
-    unsigned char line1[]={"THIS IS LINE 01!"}, line2[]={"THIS IS LINE 02!"}, refresh[]={"REFRESH IN 5 SEC"};
+    const unsigned char* line1 = "THIS IS LINE 01!";
+    const unsigned char* line2 = "THIS IS LINE 02!";
+    const unsigned char* refresh = "REFRESH IN 5 SEC";
     
-    // 40 ms to initialize the LCD controller.
-    mcs51_timer0_delay(LCD_40000US_START_HIGHBITS, LCD_40000US_START_LOWBITS);
-
-    // Trial and error: 
-    // minimum value to enable the LCD to effectively read/write from/to the BUS AND check the BUSY_FLAG.
-    lcd_set_pulse_and_busyflag_delay(DATA_BUS_PULSE_INTERVAL);
-
-    lcd_irwrite(HD44780_IR_5X8_8BITS_TWO_DISPLAY_LINES);
-    lcd_irwrite(HD44780_IR_DISPLAY_ON_CURSOR_ON);
+    // Initialize the LCD.
+    lcd_initialize(
+        LCD_FUNCSET_8BITMODE | LCD_FUNCSET_2LINE | LCD_FUNCSET_5x8DOTS,
+        LCD_DLAY_PE_PWEH,
+        LCD_DLAY_PE_TAH,
+        LCD_DLAY_INIT_3RD,
+        LCD_DLAY_CLEAR_DISPLAY_HOME,
+        LCD_DLAY_INIT_1ST_2ND,
+        LCD_DLAY_INIT
+    );
     
     while(1){
-        lcd_irwrite(HD44780_IR_DISPLAY_CLEAR);
-        lcd_irwrite(HD44780_IR_DISPLAY_CURSOR_HOME_FIRSTLINE);
-        lcd_stringwrite(refresh);
+        lcd_clear();
+        lcd_set_cursor(0, 0);
+        lcd_print(refresh);
+        mcs51_mult_max_timer0_delay(FIVE_SECONDS_MULT, FIVE_SECONDS_COUNTER);
 
-        mcs51_mult_max_timer0_delay(FIVE_SECONDS_MULT, FIVE_SECONDS_HIGHBITS, FIVE_SECONDS_LOWBITS);
-        lcd_irwrite(HD44780_IR_DISPLAY_CLEAR);
-        lcd_irwrite(HD44780_IR_DISPLAY_CURSOR_HOME_FIRSTLINE);
+        lcd_clear();
+        lcd_set_cursor(0, 0);
+        lcd_print(line1);
 
-        lcd_stringwrite(line1);
-
-        lcd_irwrite(HD44780_IR_DISPLAY_CURSOR_HOME_SECONLINE);
-        lcd_stringwrite(line2);
-        mcs51_mult_max_timer0_delay(TWO_SECONDS_MULT, TWO_SECONDS_HIGHBITS, TWO_SECONDS_LOWBITS);
+        lcd_set_cursor(1, 0);
+        lcd_print(line2);
+        mcs51_mult_max_timer0_delay(TWO_SECONDS_MULT, TWO_SECONDS_COUNTER);
     }
 }

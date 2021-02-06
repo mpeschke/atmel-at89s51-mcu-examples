@@ -955,38 +955,36 @@ _lcd_blink_off:
 ;lcd_dlay_clear_display_home Allocated with name '_lcd_initialize_PARM_5'
 ;lcd_dlay_init_1st_2nd     Allocated with name '_lcd_initialize_PARM_6'
 ;lcd_dlay_init             Allocated with name '_lcd_initialize_PARM_7'
-;lcd_display_function_set  Allocated to registers r7 
+;lcd_display_function_set  Allocated to registers 
 ;------------------------------------------------------------
 ;	../lib/hd44780.c:297: void lcd_initialize(
 ;	-----------------------------------------
 ;	 function lcd_initialize
 ;	-----------------------------------------
 _lcd_initialize:
-	mov	r7,dpl
-;	../lib/hd44780.c:307: _LCD_RS=0;
-;	assignBit
-	clr	__LCD_RS
-;	../lib/hd44780.c:308: _LCD_RW=0;
-;	assignBit
-	clr	__LCD_RW
-;	../lib/hd44780.c:309: _LCD_EN=0;
-;	assignBit
-	clr	__LCD_EN
-;	../lib/hd44780.c:311: _DLAY_PE_PWEH               = lcd_dlay_pe_pweh;
+	mov	__DISPLAY_FUNC_SET,dpl
+;	../lib/hd44780.c:307: _DLAY_PE_PWEH               = lcd_dlay_pe_pweh;
 	mov	__DLAY_PE_PWEH,_lcd_initialize_PARM_2
 	mov	(__DLAY_PE_PWEH + 1),(_lcd_initialize_PARM_2 + 1)
-;	../lib/hd44780.c:312: _DLAY_PE_TAH                = lcd_dlay_pe_tah;
+;	../lib/hd44780.c:308: _DLAY_PE_TAH                = lcd_dlay_pe_tah;
 	mov	__DLAY_PE_TAH,_lcd_initialize_PARM_3
 	mov	(__DLAY_PE_TAH + 1),(_lcd_initialize_PARM_3 + 1)
-;	../lib/hd44780.c:313: _DLAY_CLEAR_DISPLAY_HOME    = lcd_dlay_clear_display_home;
+;	../lib/hd44780.c:309: _DLAY_CLEAR_DISPLAY_HOME    = lcd_dlay_clear_display_home;
 	mov	__DLAY_CLEAR_DISPLAY_HOME,_lcd_initialize_PARM_5
 	mov	(__DLAY_CLEAR_DISPLAY_HOME + 1),(_lcd_initialize_PARM_5 + 1)
-;	../lib/hd44780.c:314: _DISPLAY_FUNC_SET           = lcd_display_function_set;
-	mov	__DISPLAY_FUNC_SET,r7
-;	../lib/hd44780.c:316: mcs51_timer0_delay_16bit(lcd_dlay_init);
+;	../lib/hd44780.c:312: mcs51_timer0_delay_16bit(lcd_dlay_init);
 	mov	dpl,_lcd_initialize_PARM_7
 	mov	dph,(_lcd_initialize_PARM_7 + 1)
 	lcall	_mcs51_timer0_delay_16bit
+;	../lib/hd44780.c:314: _LCD_RS=0;
+;	assignBit
+	clr	__LCD_RS
+;	../lib/hd44780.c:315: _LCD_RW=0;
+;	assignBit
+	clr	__LCD_RW
+;	../lib/hd44780.c:316: _LCD_EN=0;
+;	assignBit
+	clr	__LCD_EN
 ;	../lib/hd44780.c:318: if (! (_DISPLAY_FUNC_SET & LCD_FUNCSET_8BITMODE)) {
 	mov	dptr,#_LCD_FUNCSET_8BITMODE
 	clr	a
@@ -1022,35 +1020,35 @@ _lcd_initialize:
 	lcall	_lcd_irwrite_4bits_bus
 	sjmp	00103$
 00102$:
-;	../lib/hd44780.c:338: lcd_irwrite(LCD_FUNCTIONSET | _DISPLAY_FUNC_SET);
+;	../lib/hd44780.c:338: lcd_instruction_register_write(LCD_FUNCTIONSET | _DISPLAY_FUNC_SET);
 	mov	dptr,#_LCD_FUNCTIONSET
 	clr	a
 	movc	a,@a+dptr
 	orl	a,__DISPLAY_FUNC_SET
 	mov	dpl,a
-	lcall	_lcd_irwrite
+	lcall	_lcd_instruction_register_write
 ;	../lib/hd44780.c:339: mcs51_timer0_delay_16bit(lcd_dlay_init_1st_2nd);
 	mov	dpl,_lcd_initialize_PARM_6
 	mov	dph,(_lcd_initialize_PARM_6 + 1)
 	lcall	_mcs51_timer0_delay_16bit
-;	../lib/hd44780.c:342: lcd_irwrite(LCD_FUNCTIONSET | _DISPLAY_FUNC_SET);
+;	../lib/hd44780.c:342: lcd_instruction_register_write(LCD_FUNCTIONSET | _DISPLAY_FUNC_SET);
 	mov	dptr,#_LCD_FUNCTIONSET
 	clr	a
 	movc	a,@a+dptr
 	orl	a,__DISPLAY_FUNC_SET
 	mov	dpl,a
-	lcall	_lcd_irwrite
+	lcall	_lcd_instruction_register_write
 ;	../lib/hd44780.c:343: mcs51_timer0_delay_16bit(lcd_dlay_init_3rd);
 	mov	dpl,_lcd_initialize_PARM_4
 	mov	dph,(_lcd_initialize_PARM_4 + 1)
 	lcall	_mcs51_timer0_delay_16bit
-;	../lib/hd44780.c:346: lcd_irwrite(LCD_FUNCTIONSET | _DISPLAY_FUNC_SET);
+;	../lib/hd44780.c:346: lcd_instruction_register_write(LCD_FUNCTIONSET | _DISPLAY_FUNC_SET);
 	mov	dptr,#_LCD_FUNCTIONSET
 	clr	a
 	movc	a,@a+dptr
 	orl	a,__DISPLAY_FUNC_SET
 	mov	dpl,a
-	lcall	_lcd_irwrite
+	lcall	_lcd_instruction_register_write
 00103$:
 ;	../lib/hd44780.c:350: lcd_instruction_register_write(LCD_FUNCTIONSET | _DISPLAY_FUNC_SET);
 	mov	dptr,#_LCD_FUNCTIONSET

@@ -304,10 +304,6 @@ void lcd_initialize(
     const unsigned int  lcd_dlay_init
 )
 {
-    _LCD_RS=0;
-    _LCD_RW=0;
-    _LCD_EN=0;
-
     _DLAY_PE_PWEH               = lcd_dlay_pe_pweh;
     _DLAY_PE_TAH                = lcd_dlay_pe_tah;
     _DLAY_CLEAR_DISPLAY_HOME    = lcd_dlay_clear_display_home;
@@ -315,7 +311,11 @@ void lcd_initialize(
 
     mcs51_timer0_delay_16bit(lcd_dlay_init);
 
-    if (! (_DISPLAY_FUNC_SET & LCD_FUNCSET_8BITMODE)) {
+    _LCD_RS=0;
+    _LCD_RW=0;
+    _LCD_EN=0;
+
+   if (! (_DISPLAY_FUNC_SET & LCD_FUNCSET_8BITMODE)) {
         // we start in 8bit mode, try to set 4 bit mode
         lcd_irwrite_4bits_bus(0x03);
         mcs51_timer0_delay_16bit(lcd_dlay_init_1st_2nd);
@@ -335,15 +335,15 @@ void lcd_initialize(
         // page 45 figure 23
 
         // Send function set command sequence
-        lcd_irwrite(LCD_FUNCTIONSET | _DISPLAY_FUNC_SET);
+        lcd_instruction_register_write(LCD_FUNCTIONSET | _DISPLAY_FUNC_SET);
         mcs51_timer0_delay_16bit(lcd_dlay_init_1st_2nd);
 
         // second try
-        lcd_irwrite(LCD_FUNCTIONSET | _DISPLAY_FUNC_SET);
+        lcd_instruction_register_write(LCD_FUNCTIONSET | _DISPLAY_FUNC_SET);
         mcs51_timer0_delay_16bit(lcd_dlay_init_3rd);
 
         // third go
-        lcd_irwrite(LCD_FUNCTIONSET | _DISPLAY_FUNC_SET);
+        lcd_instruction_register_write(LCD_FUNCTIONSET | _DISPLAY_FUNC_SET);
     }
 
     // third go
