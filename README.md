@@ -97,14 +97,16 @@ To build this example:
 Build the libraries' machine code objects:  
 
 >*$ sdcc -c ../lib/hd44780.c*  
+>*$ sdcc -c ../lib/mcs-51.c*  
 
 Create the libraries' lib files:  
 
 >*$ sdar -rc hd44780.lib hd44780.rel*  
+>*$ sdar -rc mcs-51.lib mcs-51.rel*  
 
 Build the example's machine code objects and link to the libraries' binaries:  
 
->*$ sdcc ex3-serial-lcd-4bits.c hd44780.lib -L hd44780.lib*  
+>*$ sdcc ex3-serial-lcd-4bits.c mcs-51.lib hd44780.lib -L mcs-51.lib hd44780.lib*  
 
 Create the Intel HEX file ready to be flashed into the MCU's firmware:  
 
