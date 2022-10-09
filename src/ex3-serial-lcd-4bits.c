@@ -1,6 +1,6 @@
+#include <at89x51.h>
 #include "../lib/hd44780.h"
 #include "../lib/mcs-51.h"
-#include <at89x51.h>
 
 /*
 For a 10MHz crystal oscillator, the two AT89S51 internal timers will have a frequency of:
@@ -33,10 +33,23 @@ The following intervals are relevant to the HD44780 controller (in nanoseconds):
 */
 
 // TIMER COUNTS=65535-START=33334d => START=32201d=7DC9h
-static const unsigned char  LCD_40000US_START_HIGHBITS  = 0x7D;
-static const unsigned char  LCD_40000US_START_LOWBITS   = 0xC9;
-
-static const unsigned int   DATA_BUS_PULSE_INTERVAL     = 0x00A0;
+// 10 MHz TIMER COUNTS=65535-START=1d => START=64334d=FFFEh
+static const unsigned int  LCD_DLAY_PE_PWEH             = 0xFFFE;
+// 10 MHz TIMER COUNTS=65535-START=84d => START=65451d=FFABh
+// 12 MHz TIMER COUNTS=65535-START=100d => START=64535d=FC17h
+static const unsigned int  LCD_DLAY_PE_TAH              = 0xFFAB;
+// 10 MHz TIMER COUNTS=65535-START=125d => START=65410d=FF82h
+// 12 MHz TIMER COUNTS=65535-START=150d => START=65385d=FF69h
+static const unsigned int  LCD_DLAY_INIT_3RD            = 0xFF82;
+// 10 MHz TIMER COUNTS=65535-START=1667d => START=63868d=F97Ch
+// 12 MHz TIMER COUNTS=65535-START=2000d => START=63535d=F82Fh
+static const unsigned int  LCD_DLAY_CLEAR_DISPLAY_HOME  = 0xF97C;
+// 10 MHz TIMER COUNTS=65535-START=3750d => START=61785d=F159h
+// 12 MHz TIMER COUNTS=65535-START=4500d => START=61035d=EE6Bh
+static const unsigned int  LCD_DLAY_INIT_1ST_2ND        = 0xF159;
+// 10 MHz TIMER COUNTS=65535-START=41667d => START=23868d=5D3Ch
+// 12 MHz TIMER COUNTS=65535-START=50000d => START=15535d=3CAFh
+static const unsigned int  LCD_DLAY_INIT                = 0x5D3C;
 
 static const unsigned char  FIRST_LINE_BUFF[]           = {"MESSAGE:"};
 
@@ -65,21 +78,21 @@ void initialize_serial(void)
 
 int main()
 {    
-    // 40 ms to initialize the LCD controller.
-    mcs51_timer0_delay(LCD_40000US_START_HIGHBITS, LCD_40000US_START_LOWBITS);
+    // Initialize the LCD.
+    lcd_initialize(
+        LCD_FUNCSET_4BITMODE | LCD_FUNCSET_2LINE | LCD_FUNCSET_5x8DOTS,
+        LCD_DLAY_PE_PWEH,
+        LCD_DLAY_PE_TAH,
+        LCD_DLAY_INIT_3RD,
+        LCD_DLAY_CLEAR_DISPLAY_HOME,
+        LCD_DLAY_INIT_1ST_2ND,
+        LCD_DLAY_INIT
+    );
 
-    // Trial and error: 
-    // minimum value to enable the LCD to effectively read/write from/to the BUS AND check the BUSY_FLAG.
-    lcd_set_pulse_and_busyflag_delay(DATA_BUS_PULSE_INTERVAL);
-    
-    // Initialization of the LCD by instructions (see HITACHI manual).
-    lcd_irwrite_4bits(HD44780_IR_ENABLE_4BIT_IRDR);
-    lcd_irwrite_4bits(HD44780_IR_5X8_4BITS_TWO_DISPLAY_LINES);
-    lcd_irwrite_4bits(HD44780_IR_DISPLAY_ON_CURSOR_ON);
-    
-    lcd_irwrite_4bits(HD44780_IR_DISPLAY_CURSOR_HOME_FIRSTLINE);
-    lcd_stringwrite_4bits(FIRST_LINE_BUFF);
-    lcd_irwrite_4bits(HD44780_IR_DISPLAY_CURSOR_HOME_SECONLINE);
+    lcd_clear();
+    lcd_set_cursor(0, 0);
+    lcd_print(FIRST_LINE_BUFF);
+    lcd_set_cursor(1, 0);
 
     initialize_serial();
 
