@@ -1,6 +1,6 @@
 ;--------------------------------------------------------
 ; File Created by SDCC : free open source ANSI-C Compiler
-; Version 3.8.0 #10562 (Linux)
+; Version 4.2.0 #13081 (Mac OS X x86_64)
 ;--------------------------------------------------------
 	.module ex2_lcd_4bits
 	.optsdcc -mmcs51 --model-small
@@ -34,10 +34,10 @@
 ;--------------------------------------------------------
 	.area DSEG    (DATA)
 ;--------------------------------------------------------
-; overlayable items in internal ram 
+; overlayable items in internal ram
 ;--------------------------------------------------------
 ;--------------------------------------------------------
-; Stack segment in internal ram 
+; Stack segment in internal ram
 ;--------------------------------------------------------
 	.area	SSEG
 __start__stack:
@@ -83,7 +83,7 @@ __start__stack:
 	.area GSFINAL (CODE)
 	.area CSEG    (CODE)
 ;--------------------------------------------------------
-; interrupt vector 
+; interrupt vector
 ;--------------------------------------------------------
 	.area HOME    (CODE)
 __interrupt_vect:
@@ -135,11 +135,11 @@ _main:
 	ar0 = 0x00
 ;	ex2-lcd-4bits.c:71: const unsigned char* line = "FEDCBA9876543210";
 ;	ex2-lcd-4bits.c:75: LCD_FUNCSET_4BITMODE | LCD_FUNCSET_2LINE | LCD_FUNCSET_5x8DOTS,
-	mov	dptr,#_LCD_FUNCSET_2LINE
+	mov	dptr,#_LCD_FUNCSET_4BITMODE
 	clr	a
 	movc	a,@a+dptr
 	mov	r7,a
-	mov	dptr,#_LCD_FUNCSET_4BITMODE
+	mov	dptr,#_LCD_FUNCSET_2LINE
 	clr	a
 	movc	a,@a+dptr
 	orl	ar7,a
@@ -252,23 +252,25 @@ _LCD_FUNCSET_2LINE:
 _LCD_FUNCSET_8BITMODE:
 	.db #0x10	; 16
 _FIVE_SECONDS_MULT:
-	.byte #0x40,#0x00	; 64
+	.byte #0x40, #0x00	; 64
 _FIVE_SECONDS_COUNTER:
-	.byte #0xaf,#0x01	; 431
+	.byte #0xaf, #0x01	; 431
 _LCD_DLAY_PE_PWEH:
-	.byte #0xfe,#0xff	; 65534
+	.byte #0xfe, #0xff	; 65534
 _LCD_DLAY_PE_TAH:
-	.byte #0xab,#0xff	; 65451
+	.byte #0xab, #0xff	; 65451
 _LCD_DLAY_INIT_3RD:
-	.byte #0x82,#0xff	; 65410
+	.byte #0x82, #0xff	; 65410
 _LCD_DLAY_CLEAR_DISPLAY_HOME:
-	.byte #0x7c,#0xf9	; 63868
+	.byte #0x7c, #0xf9	; 63868
 _LCD_DLAY_INIT_1ST_2ND:
-	.byte #0x59,#0xf1	; 61785
+	.byte #0x59, #0xf1	; 61785
 _LCD_DLAY_INIT:
-	.byte #0x3c,#0x5d	; 23868
+	.byte #0x3c, #0x5d	; 23868
+	.area CONST   (CODE)
 ___str_0:
 	.ascii "FEDCBA9876543210"
 	.db 0x00
+	.area CSEG    (CODE)
 	.area XINIT   (CODE)
 	.area CABS    (ABS,CODE)

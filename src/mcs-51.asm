@@ -1,6 +1,6 @@
 ;--------------------------------------------------------
 ; File Created by SDCC : free open source ANSI-C Compiler
-; Version 3.8.0 #10562 (Linux)
+; Version 4.2.0 #13081 (Mac OS X x86_64)
 ;--------------------------------------------------------
 	.module mcs_51
 	.optsdcc -mmcs51 --model-small
@@ -236,7 +236,7 @@ _mcs51_mult_max_timer0_delay_PARM_2:
 _mcs51_mult_max_timer1_delay_PARM_2:
 	.ds 2
 ;--------------------------------------------------------
-; overlayable items in internal ram 
+; overlayable items in internal ram
 ;--------------------------------------------------------
 	.area	OSEG    (OVR,DATA)
 _mcs51_timer0_delay_PARM_2:
