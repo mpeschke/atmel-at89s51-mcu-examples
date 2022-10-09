@@ -4,7 +4,11 @@
 
 //////////////////////////////////////////////////////////
 // 8bit data/instruction BUS.
-__sfr __at 0x80  _LCD_IR_DR_BUS;    // P0
+__sfr  __at 0x80  _LCD_IR_DR_BUS;   // P0
+__sbit __at 0x80  _LCD_IR_DR_BUS_0; // P0_0
+__sbit __at 0x81  _LCD_IR_DR_BUS_1; // P0_1
+__sbit __at 0x82  _LCD_IR_DR_BUS_2; // P0_2
+__sbit __at 0x83  _LCD_IR_DR_BUS_3; // P0_3
 //////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////
@@ -18,7 +22,7 @@ __sbit __at 0x87  _BUSY_FLAG;       // P0_7
 //////////////////////////////////////////////////////////
 // LCD Pulse Enable ports.
 __sbit __at 0xA0  _LCD_EN;          // P2_0
-__sbit __at 0xA1  _LCD_RW;          // P2_1
+//__sbit __at 0xA1  _LCD_RW;          // P2_1
 __sbit __at 0xA2  _LCD_RS;          // P2_2
 //////////////////////////////////////////////////////////
 
@@ -75,26 +79,6 @@ void pulse_enable()
     mcs51_timer0_delay_16bit(_DLAY_PE_TAH);
 }
 
-/**
-    Set the LCD controller to 'write instruction register'.
-
-*/
-void instruction_register_write_internal_operation()
-{
-    _LCD_RS=0;
-    _LCD_RW=0;
-}
-
-/**
-    Set the LCD controller to 'write data register'.
-
-*/
-void data_register_write_internal_operation()
-{
-    _LCD_RS=1;
-    _LCD_RW=0;
-}
-
 // CONTROL PULSE ENABLE AND BUS READ/WRITE MODES
 //******************************************************************************
 
@@ -102,42 +86,15 @@ void data_register_write_internal_operation()
 // 8-BIT BUS FUNCTIONS
 
 /**
-    Sends an instruction register to the LCD controller.
-
-    @param ir the instruction register (command) - see HD44780 documentation.
-*/
-void lcd_irwrite(const unsigned char ir)
-{
-    // Place the Instruction Register on the MCU-LCD BUS.
-    instruction_register_write_internal_operation();
-    _LCD_IR_DR_BUS=ir;
-    pulse_enable();
-}
-
-/**
     Sends a data register to the LCD controller.
 
     @param dr the data register (a string character).
 */
-void lcd_drwrite(const unsigned char dr)
+void write8bits(const unsigned char dr)
 {
     // Place the Data Register on the MCU-LCD BUS.
-    data_register_write_internal_operation();
-    _LCD_IR_DR_BUS=dr;
+    _LCD_IR_DR_BUS = (dr);
     pulse_enable();
-}
-
-/**
-    Function to send a string to the LCD controller - each character at a time
-    (each character is a 8-bit data register).
-
-    @param pstr pointer to a string.
-*/
-void lcd_stringwrite(const unsigned char* pstr)
-{
-    unsigned char i;
-    for(i=0; pstr[i] != 0; i++)
-        lcd_drwrite(pstr[i]);
 }
 
 // 8-BIT BUS FUNCTIONS
@@ -147,51 +104,18 @@ void lcd_stringwrite(const unsigned char* pstr)
 // 4-BIT BUS FUNCTIONS
 
 /**
-    Sends 4-bits of a instruction register to the LCD controller.
-
-    @param fourbits 4-bits of the instruction register.
-*/
-void lcd_irwrite_4bits_bus(const unsigned char fourbits)
-{
-    // Place the Instruction Register on the MCU-LCD BUS.
-    instruction_register_write_internal_operation();
-    _LCD_IR_DR_BUS_4 = (fourbits & (1<<4));
-    _LCD_IR_DR_BUS_5 = (fourbits & (1<<5));
-    _LCD_IR_DR_BUS_6 = (fourbits & (1<<6));
-    _BUSY_FLAG       = (fourbits & (1<<7));
-    pulse_enable();
-}
-
-/**
     Sends 4-bits of a data register to the LCD controller.
 
     @param fourbits 4-bits of the data register.
 */
-void lcd_drwrite_4bits_bus(const unsigned char fourbits)
+void write4bits(const unsigned char fourbits)
 {
     // Place the Data Register on the MCU-LCD BUS.
-    data_register_write_internal_operation();
     _LCD_IR_DR_BUS_4 = (fourbits & (1<<4));
     _LCD_IR_DR_BUS_5 = (fourbits & (1<<5));
     _LCD_IR_DR_BUS_6 = (fourbits & (1<<6));
     _BUSY_FLAG       = (fourbits & (1<<7));
     pulse_enable();
-}
-
-/**
-    Function to send a string to the LCD controller - 4-bits of the character at a time
-    (each character is a 8-bit data register).
-
-    @param pstr pointer to a string.
-*/
-void lcd_stringwrite_4bits(const unsigned char* pstr)
-{
-    unsigned char i;
-    for(i=0; pstr[i] != 0; i++)
-    {
-        lcd_drwrite_4bits_bus(pstr[i]);      // Send first the upper 4 bits.
-        lcd_drwrite_4bits_bus(pstr[i] << 4); // and then the lower 4 bits.
-    }
 }
 
 // 4-BIT BUS FUNCTIONS
@@ -201,97 +125,107 @@ void lcd_stringwrite_4bits(const unsigned char* pstr)
 // 4-BIT/8-BIT LCD FUNCTION WRAPPERS
 
 /**
-    Sends an instruction (command) to the LCD controller.
+    Function to send a string to the LCD controller - 4-bits of the character at a time
+    (each character is a 8-bit data register).
 
-    @param ir 8-bit instruction register.
+    @param pstr pointer to a string.
 */
-void lcd_instruction_register_write(const unsigned char ir)
+void send(const unsigned char dr, const unsigned char mode)
 {
+    _LCD_RS=mode;
+
     if (! (_DISPLAY_FUNC_SET & LCD_FUNCSET_8BITMODE))
     {
-        lcd_irwrite_4bits_bus(ir);      // Send first the upper 4 bits.
-        lcd_irwrite_4bits_bus(ir << 4); // and then the lower 4 bits.
+        write4bits(dr);         // Send first the upper 4 bits.
+        write4bits(dr << 4);    // and then the lower 4 bits.
     }
     else
-        lcd_irwrite(ir);
+    {
+        write8bits(dr);
+    }
 }
 
 /**
-    Sends a data (character) to the LCD controller.
+    Function to send a string to the LCD controller - 4-bits of the character at a time
+    (each character is a 8-bit data register).
 
-    @param dr 8-bit data register (a string character).
+    @param dr pointer to a string.
 */
-void lcd_data_register_write(const unsigned char dr)
+void command(const unsigned char dr)
 {
-    if (! (_DISPLAY_FUNC_SET & LCD_FUNCSET_8BITMODE))
-    {
-        lcd_drwrite_4bits_bus(dr);      // Send first the upper 4 bits.
-        lcd_drwrite_4bits_bus(dr << 4); // and then the lower 4 bits.
-    }
-    else
-        lcd_drwrite(dr);
+    send(dr, 0x00);
+}
+
+/**
+    Function to send a string to the LCD controller - 4-bits of the character at a time
+    (each character is a 8-bit data register).
+
+    @param dr pointer to a string.
+*/
+void write(const unsigned char dr)
+{
+    send(dr, 0xFF);
 }
 
 void lcd_print(const unsigned char* pstr)
 {
-    if (! (_DISPLAY_FUNC_SET & LCD_FUNCSET_8BITMODE))
-        lcd_stringwrite_4bits(pstr);
-    else
-        lcd_stringwrite(pstr);
+    unsigned char i;
+    for(i=0; pstr[i] != 0; i++)
+        write(pstr[i]);
 }
 
 void lcd_clear()
 {
-    lcd_instruction_register_write(LCD_CLEARDISPLAY);  // clear display, set cursor position to zero
+    command(LCD_CLEARDISPLAY);  // clear display, set cursor position to zero
 
     mcs51_timer0_delay_16bit(_DLAY_CLEAR_DISPLAY_HOME);
 }
 
 void lcd_set_cursor(const unsigned char row, const unsigned char col)
 {
-    lcd_instruction_register_write(LCD_SETDDRAMADDR | (col + 0x40 * row));  // Set cursor position.
+    command(LCD_SETDDRAMADDR | (col + 0x40 * row));  // Set cursor position.
 }
 
 void lcd_display_on()
 {
     _DISPLAY_CONTROL |= LCD_DISPLAYON;
 
-    lcd_instruction_register_write(LCD_DISPLAYCONTROL | _DISPLAY_CONTROL);  // Turn display ON
+    command(LCD_DISPLAYCONTROL | _DISPLAY_CONTROL);  // Turn display ON
 }
 
 void lcd_display_off()
 {
     _DISPLAY_CONTROL &= ~LCD_DISPLAYON;
 
-    lcd_instruction_register_write(LCD_DISPLAYCONTROL | _DISPLAY_CONTROL);  // Turn display OFF
+    command(LCD_DISPLAYCONTROL | _DISPLAY_CONTROL);  // Turn display OFF
 }
 
 void lcd_cursor_on()
 {
     _DISPLAY_CONTROL |= LCD_CURSORON;
 
-    lcd_instruction_register_write(LCD_DISPLAYCONTROL | _DISPLAY_CONTROL);  // Turn cursor ON
+    command(LCD_DISPLAYCONTROL | _DISPLAY_CONTROL);  // Turn cursor ON
 }
 
 void lcd_cursor_off()
 {
     _DISPLAY_CONTROL &= ~LCD_CURSORON;
 
-    lcd_instruction_register_write(LCD_DISPLAYCONTROL | _DISPLAY_CONTROL);  // Turn cursor OFF
+    command(LCD_DISPLAYCONTROL | _DISPLAY_CONTROL);  // Turn cursor OFF
 }
 
 void lcd_blink_on()
 {
     _DISPLAY_CONTROL |= LCD_BLINKON;
 
-    lcd_instruction_register_write(LCD_DISPLAYCONTROL | _DISPLAY_CONTROL);  // Turn cursor blinking ON
+    command(LCD_DISPLAYCONTROL | _DISPLAY_CONTROL);  // Turn cursor blinking ON
 }
 
 void lcd_blink_off()
 {
     _DISPLAY_CONTROL &= ~LCD_BLINKON;
 
-    lcd_instruction_register_write(LCD_DISPLAYCONTROL | _DISPLAY_CONTROL);  // Turn cursor blinking OFF
+    command(LCD_DISPLAYCONTROL | _DISPLAY_CONTROL);  // Turn cursor blinking OFF
 }
 
 void lcd_initialize(
@@ -312,53 +246,50 @@ void lcd_initialize(
     mcs51_timer0_delay_16bit(lcd_dlay_init);
 
     _LCD_RS=0;
-    _LCD_RW=0;
     _LCD_EN=0;
 
-   if (! (_DISPLAY_FUNC_SET & LCD_FUNCSET_8BITMODE)) {
+    if (! (_DISPLAY_FUNC_SET & LCD_FUNCSET_8BITMODE)) {
         // we start in 8bit mode, try to set 4 bit mode
-        lcd_irwrite_4bits_bus(0x03);
+        write4bits(0x03);
         mcs51_timer0_delay_16bit(lcd_dlay_init_1st_2nd);
 
         // second try
-        lcd_irwrite_4bits_bus(0x03);
+        write4bits(0x03);
         mcs51_timer0_delay_16bit(lcd_dlay_init_1st_2nd);
         
         // third go!
-        lcd_irwrite_4bits_bus(0x03);
+        write4bits(0x03);
         mcs51_timer0_delay_16bit(lcd_dlay_init_3rd);
 
         // finally, set to 4-bit interface
-        lcd_irwrite_4bits_bus(LCD_ENABLE_4BIT);
+        write4bits(LCD_ENABLE_4BIT);
     } else {
         // this is according to the hitachi HD44780 datasheet
         // page 45 figure 23
 
         // Send function set command sequence
-        lcd_instruction_register_write(LCD_FUNCTIONSET | _DISPLAY_FUNC_SET);
+        command(LCD_FUNCTIONSET | _DISPLAY_FUNC_SET);
         mcs51_timer0_delay_16bit(lcd_dlay_init_1st_2nd);
 
         // second try
-        lcd_instruction_register_write(LCD_FUNCTIONSET | _DISPLAY_FUNC_SET);
+        command(LCD_FUNCTIONSET | _DISPLAY_FUNC_SET);
         mcs51_timer0_delay_16bit(lcd_dlay_init_3rd);
 
         // third go
-        lcd_instruction_register_write(LCD_FUNCTIONSET | _DISPLAY_FUNC_SET);
+        command(LCD_FUNCTIONSET | _DISPLAY_FUNC_SET);
     }
 
     // third go
-    lcd_instruction_register_write(LCD_FUNCTIONSET | _DISPLAY_FUNC_SET);
+    command(LCD_FUNCTIONSET | _DISPLAY_FUNC_SET);
 
-    _DISPLAY_CONTROL = LCD_DISPLAYON | LCD_CURSOROFF | LCD_BLINKOFF;  
-    _DISPLAY_CONTROL |= LCD_DISPLAYON;
-    lcd_instruction_register_write(LCD_DISPLAYCONTROL | _DISPLAY_CONTROL);
+    lcd_display_on();
 
     lcd_clear();
 
     // Initialize to default text direction (for romance languages)
     _DISPLAY_MODE = LCD_ENTRYLEFT | LCD_ENTRYSHIFTDECREMENT;
     // set the entry mode
-    lcd_instruction_register_write(LCD_ENTRYMODESET | _DISPLAY_MODE);
+    command(LCD_ENTRYMODESET | _DISPLAY_MODE);
 }
 
 // 4-BIT/8-BIT LCD FUNCTION WRAPPERS
